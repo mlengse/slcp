@@ -2,6 +2,7 @@ const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
 
+
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 // The file token.json stores the user's access and refresh tokens, and is
@@ -83,45 +84,88 @@ const getNewToken = async oAuth2Client => {
   })
 }
 
-/**
- * Prints the names and majors of students in a sample spreadsheet:
- * @see https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
- * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
- */
-exports._listKontak =  async ({ that }) => {
-
-  const auth = await authorize()
-
-  const sheets = google.sheets({version: 'v4', auth});
-  return await new Promise ( (resolve, reject) => sheets.spreadsheets.values.get({
+exports._fetchSheet = async ( {that, sheetName}) => {
+  return await new Promise ( (resolve, reject) => that.sheets.spreadsheets.values.get({
     spreadsheetId: that.config.SHEET_ID,
-    range: 'Sheet1',
+    range: sheetName,
   }, (err, res) => {
     that.spinner.start('start listing')
     if (err) reject('The API returned an error: ' + err);
     const rows = res.data.values;
     if (rows.length) {
       // Print columns A and E, which correspond to indices 0 and 4.
-      const headers = rows[0]
+      let headers, headersID
       rows.map((row, id) => {
+        if(row[0] && row[0].toLowerCase() === 'no') {
+          headers = row
+          headersID = id
+        }
         let objRow = {}
-        if(id){
+        if(id && headers && headersID !== id){
+          // console.log(row[id][0])
+          // if(row[id][0])
           row.map((col, id) => {
-            if(col && col.length){
-              objRow[headers[id].split(' ').join('_')] = col
+            if(col && col.length && headers[id]){
+              let headersName = headers[id].toLowerCase()
+              .split('(').join(' ')
+              .split(')').join(' ')
+              .split('.').join(' ')
+              .split('/').join(' ')
+              .split('-').join(' ')
+              .trim()
+              .split('  ').join(' ')
+              .split(' ').join('_')
+              objRow[headersName] = col
             }
           })
-          rows[id] = objRow
+          objRow.kelurahan = sheetName.toLowerCase().split('konter').join(' ').split('konfirm').join(' ').trim()
+          Object.keys(objRow).length > 2 ? rows[id] = objRow : null
         }
         // console.log(`${row[0]}, ${row[4]}`);
-      });
-      rows.shift()
-      that.spinner.succeed(`data found: ${rows.length}`)
-      resolve(rows)
+      })
+      
+      let filteredRows = rows.filter(row => !Array.isArray(row));
+      // rows.shift()
+      that.spinner.succeed(`data found ${sheetName}: ${filteredRows.length}`)
+      resolve(filteredRows)
 
     } else {
       that.spinner.succeed('no data found')
       resolve([]);
     }
-  }));
+  }))
+}
+/**
+ * Prints the names and majors of students in a sample spreadsheet:
+ * @see https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+ * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
+ */
+exports._fetchKasus =  async ({ that }) => {
+
+  const auth = await authorize()
+
+  that.sheets = google.sheets({version: 'v4', auth});
+
+  const sheetsList = (await that.sheets.spreadsheets.get({ 
+    spreadsheetId: that.config.SHEET_ID
+  })).data.sheets.map((sheet) => {
+    return sheet.properties.title
+  })
+
+  let listConfirms = []
+  let listKonters = []
+
+  if(sheetsList.length) for(sheetName of sheetsList) {
+    if(sheetName.toLowerCase().includes('konfirm')){
+      listConfirms = [ ...listConfirms, ...(await that.fetchSheet({sheetName}))]
+    }
+    if(sheetName.toLowerCase().includes('konter')){
+      listKonters = [ ...listKonters, ...(await that.fetchSheet({sheetName}))]
+    }
+  }
+
+  that.listConfirms = listConfirms
+  that.listKonters = listKonters
+
+  // return ;
 }

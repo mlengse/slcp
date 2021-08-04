@@ -138,25 +138,27 @@ exports._getPendaftarByPpkTgl = async ({ that, tgldaftar }) =>{
   return []
 }
 
-exports._loginPcare = async ({ that }) => {
-  let needLogin = await that.page.$('input.form-control[placeholder="Username"]')
+exports._loginSilacak = async ({ that }) => {
+  !that.Browser && await that.initBrowser()
+
+  let needLogin = await that.page.$('input#username')
 
   if(needLogin) {
-    that.spinner.start('login pcare')
-    await that.page.waitForSelector('input.form-control[placeholder="Username"]')
-    await that.page.type('input.form-control[placeholder="Username"]', that.config.PCAREUSR)
-    await that.page.waitForSelector('input.form-control[placeholder="Password"]')
-    await that.page.type('input.form-control[placeholder="Password"]', that.config.PCAREPWD, { delay: 100 })
+    that.spinner.start('login silacak')
+    await that.page.type('input#username', that.config.SILACAK_USER)
+    await that.page.type('input#password', that.config.SILACAK_PASSWORD, { delay: 100 })
+    // await that.page.click('button#app.userAuth.signIn')
   
-    let inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
-    while(!inpVal || inpVal.length < 5 ){
-      inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
-    }
+    // let inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
+    // while(!inpVal || inpVal.length < 5 ){
+    //   inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
+    // }
   
     const [response] = await Promise.all([
       that.page.waitForNavigation(waitOpt),
-      that.page.type('#CaptchaInputText', String.fromCharCode(13)),
-      that.page.click('#btnLogin', {delay: 500}),
+      // that.page.type('#CaptchaInputText', String.fromCharCode(13)),
+      // that.page.click('#btnLogin', {delay: 500}),
+      that.page.click('button.btn.btn-login[name="loginbtn"][type="submit"]', {delay: 500})
     ]);
     
     that.spinner.succeed('logged in')
@@ -173,15 +175,19 @@ exports._initBrowser = async ({ that }) => {
   if(that.init){
     await that.init()
   }
-  that.Browser = await pptr.launch({
-    headless: false,
-    executablePath: `${that.config.CHROME_PATH}`,
-    userDataDir: `${that.config.USER_DATA_PATH}`,
-  })
+
+  if(!that.Browser) {
+    that.Browser = await pptr.launch({
+      headless: false,
+      executablePath: `${that.config.CHROME_PATH}`,
+      userDataDir: `${that.config.USER_DATA_PATH}`,
+    })
+  
+  }
 
   that.pages = await that.Browser.pages()
 
   that.page = that.pages[0]
-  await that.page.goto(`${that.config.PCARE_URL}/Login`, waitOpt)
+  await that.page.goto(`${that.config.SILACAK_URL}`, waitOpt)
 
 }
