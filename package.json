@@ -1,0 +1,32 @@
+{
+  "name": "slcp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mlengse/slcp.git"
+  },
+  "author": "mlengse",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mlengse/slcp/issues"
+  },
+  "homepage": "https://github.com/mlengse/slcp#readme",
+  "dependencies": {
+    "arangojs": "^7.5.0",
+    "axios": "^0.21.1",
+    "crypto": "^1.0.1",
+    "dotenv": "^10.0.0",
+    "googleapis": "^83.0.0",
+    "lowdb": "^2.1.0",
+    "moment": "^2.29.1",
+    "node-cron": "^3.0.0",
+    "node-rest-client": "^3.1.0",
+    "ora": "^5.4.1",
+    "puppeteer-core": "^10.1.0"
+  }
+}
