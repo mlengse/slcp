@@ -152,20 +152,16 @@ exports._fetchKasus =  async ({ that }) => {
     return sheet.properties.title
   })
 
-  let listConfirms = []
-  let listKonters = []
+  that.listConfirms = []
+  that.listKonters = []
 
   if(sheetsList.length) for(sheetName of sheetsList) {
     if(sheetName.toLowerCase().includes('konfirm')){
-      listConfirms = [ ...listConfirms, ...(await that.fetchSheet({sheetName}))]
+      that.listConfirms = [ ...that.listConfirms, ...(await that.fetchSheet({sheetName}))]
     }
     if(sheetName.toLowerCase().includes('konter')){
-      listKonters = [ ...listKonters, ...(await that.fetchSheet({sheetName}))]
+      that.listKonters = [ ...that.listKonters, ...(await that.fetchSheet({sheetName}))]
     }
   }
 
-  that.listConfirms = listConfirms
-  that.listKonters = listKonters
-
-  // return ;
 }
