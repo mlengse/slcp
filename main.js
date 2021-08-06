@@ -11,8 +11,41 @@ module.exports = async (isPM2) => {
   try{
     await app.init()
 
+    let num = 1
 
-    // console.log(confirms)
+    for( let konfirm of app.listConfirms ) {
+      let konters = app.listKonters.filter( konter => konter.nama_indeks_kasus === konfirm.no && konter.kelurahan === konfirm.kelurahan)
+      if(konters.length){
+        if(!konfirm.silacak) {
+          // push ke silacak
+          await app.pushConfirm({ confirmData: konfirm })
+          app.spinner.succeed(`${num}: ${JSON.stringify(konfirm)}`)
+        }
+
+        app.spinner.succeed(`konter: ${konters.length}`)
+
+        let numk = 1
+
+        for(let konter of konters) {
+          if(!konter.silacak) {
+            // push konter ke silacak
+
+            await app.pushKonter({ konterData: konter})
+
+          }
+  
+          app.spinner.succeed(`${num}-${numk}: ${JSON.stringify(konter)}`)
+          numk++
+
+        }
+
+        num++
+        
+      }
+  
+    }
+    
+  
     // let tanggals = [ ...new Set(kontaks.map(({ Tanggal }) => Tanggal))]
     // let listDaft = []
     // for( tanggal of tanggals){

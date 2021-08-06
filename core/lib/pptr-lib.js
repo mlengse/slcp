@@ -7,6 +7,42 @@ const waitOpt = {
 exports.waitOpt = waitOpt      
 exports._waitNav = async ({ that }) => await that.page.waitForNavigation(waitOpt)
 
+exports._pushConfirm = async ({ that, confirmData }) => {
+  await that.loginSilacak
+}
+exports._pushKonter = async ({ that, konterData }) => {
+  await that.loginSilacak
+}
+
+exports._loginSilacak = async ({ that }) => {
+  !that.Browser && await that.initBrowser()
+
+  let needLogin = await that.page.$('input#username')
+
+  if(needLogin) {
+    that.spinner.start('login silacak')
+    await that.page.type('input#username', that.config.SILACAK_USER)
+    await that.page.type('input#password', that.config.SILACAK_PASSWORD, { delay: 100 })
+    // await that.page.click('button#app.userAuth.signIn')
+  
+    // let inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
+    // while(!inpVal || inpVal.length < 5 ){
+    //   inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
+    // }
+  
+    const [response] = await Promise.all([
+      that.page.waitForNavigation(waitOpt),
+      // that.page.type('#CaptchaInputText', String.fromCharCode(13)),
+      // that.page.click('#btnLogin', {delay: 500}),
+      that.page.click('button.btn.btn-login[name="loginbtn"][type="submit"]', {delay: 500})
+    ]);
+    
+    that.spinner.succeed('logged in')
+  
+  }
+
+}
+
 exports._daftarDelete = async ({ that, pendaftar }) => {
   return await that.page.evaluate( data => {
     $.ajax({
@@ -138,34 +174,6 @@ exports._getPendaftarByPpkTgl = async ({ that, tgldaftar }) =>{
   return []
 }
 
-exports._loginSilacak = async ({ that }) => {
-  !that.Browser && await that.initBrowser()
-
-  let needLogin = await that.page.$('input#username')
-
-  if(needLogin) {
-    that.spinner.start('login silacak')
-    await that.page.type('input#username', that.config.SILACAK_USER)
-    await that.page.type('input#password', that.config.SILACAK_PASSWORD, { delay: 100 })
-    // await that.page.click('button#app.userAuth.signIn')
-  
-    // let inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
-    // while(!inpVal || inpVal.length < 5 ){
-    //   inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
-    // }
-  
-    const [response] = await Promise.all([
-      that.page.waitForNavigation(waitOpt),
-      // that.page.type('#CaptchaInputText', String.fromCharCode(13)),
-      // that.page.click('#btnLogin', {delay: 500}),
-      that.page.click('button.btn.btn-login[name="loginbtn"][type="submit"]', {delay: 500})
-    ]);
-    
-    that.spinner.succeed('logged in')
-  
-  }
-
-}
 
 exports._runScript = async ({ that }) => {
   await that.loginPcare()
