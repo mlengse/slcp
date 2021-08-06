@@ -1,5 +1,5 @@
 exports._upsertData = async ({ that }) => {
-  for(let [konfirmId, konfirm] of that.listConfirms.entries()) {
+  if(that.config.ARANGODB_DB) for(let [konfirmId, konfirm] of that.listConfirms.entries()) {
     let confirmData = await that.arangoUpsert({
       coll: 'konfirm',
       doc: Object.assign({}, konfirm, {

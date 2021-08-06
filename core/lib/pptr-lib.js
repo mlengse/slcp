@@ -8,10 +8,17 @@ exports.waitOpt = waitOpt
 exports._waitNav = async ({ that }) => await that.page.waitForNavigation(waitOpt)
 
 exports._pushConfirm = async ({ that, confirmData }) => {
-  await that.loginSilacak
+  if(!confirmData.silacak) {
+    // push ke silacak
+    await that.loginSilacak()
+  }
+
 }
 exports._pushKonter = async ({ that, konterData }) => {
-  await that.loginSilacak
+  if(!konterData.silacak) {
+    await that.loginSilacak()
+
+  }
 }
 
 exports._loginSilacak = async ({ that }) => {
@@ -23,19 +30,21 @@ exports._loginSilacak = async ({ that }) => {
     that.spinner.start('login silacak')
     await that.page.type('input#username', that.config.SILACAK_USER)
     await that.page.type('input#password', that.config.SILACAK_PASSWORD, { delay: 100 })
-    // await that.page.click('button#app.userAuth.signIn')
+    await that.page.click('button.btn.btn-login[name="loginbtn"][type="submit"]', {delay: 500})
+    await that.page.waitForNavigation(waitOpt),
+      // await that.page.click('button#app.userAuth.signIn')
   
     // let inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
     // while(!inpVal || inpVal.length < 5 ){
     //   inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
     // }
   
-    const [response] = await Promise.all([
-      that.page.waitForNavigation(waitOpt),
-      // that.page.type('#CaptchaInputText', String.fromCharCode(13)),
-      // that.page.click('#btnLogin', {delay: 500}),
-      that.page.click('button.btn.btn-login[name="loginbtn"][type="submit"]', {delay: 500})
-    ]);
+    // const [response] = await Promise.all([
+    //   that.page.waitForNavigation(waitOpt),
+    //   // that.page.type('#CaptchaInputText', String.fromCharCode(13)),
+    //   // that.page.click('#btnLogin', {delay: 500}),
+    //   that.page.click('button.btn.btn-login[name="loginbtn"][type="submit"]', {delay: 500})
+    // ]);
     
     that.spinner.succeed('logged in')
   
@@ -180,9 +189,9 @@ exports._runScript = async ({ that }) => {
 }
 
 exports._initBrowser = async ({ that }) => {
-  if(that.init){
-    await that.init()
-  }
+  // if(that.init){
+    // await that.init()
+  // }
 
   if(!that.Browser) {
     that.Browser = await pptr.launch({
