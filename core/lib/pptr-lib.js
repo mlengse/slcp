@@ -1,7 +1,7 @@
 const pptr = require('puppeteer-core')
 const waitOpt = {
-  waitUntil: 'networkidle2',
-  timeout: 0
+  waitUntil: 'networkidle0',
+  // timeout: 0
 }
 
 exports.waitOpt = waitOpt      
@@ -11,7 +11,6 @@ exports._pushConfirm = async ({ that, confirmData }) => {
   if(!confirmData.silacak) {
     // push ke silacak
     await that.loginSilacak()
-
     if(await that.page.$('#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button')) {
       await that.page.click('#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button')
     }
@@ -25,18 +24,21 @@ exports._pushConfirm = async ({ that, confirmData }) => {
     await that.page.type('input#nik', confirmData.nik)
     let [filter] = await that.page.$x("//button[contains(., 'Filter')]");
     if (filter) {
-      await filter.click()
-      await that.page.waitForTimeout(500)
+      await Promise.all([
+        filter.click(),
+        that.page.waitForResponse(response=>response.status=200)
+      ])
       let table = await that.page.$x("//table[contains(., 'Nama')]")
       if(table[0]){
         let jso = await that.page.evaluate( el => el.innerText, table[0])
         if(jso.includes(confirmData.nik)){
           console.log(jso)
         } else {
-          let [baru] = await that.page.$x("//button[contains(., 'Catat Kasus')]");
-          if (baru) {
-            await baru.click();
-          }
+          // let [baru] = await that.page.$x("//button[contains(., 'Catat Kasus')]");
+          // if (baru) {
+            // await baru.click();
+          // }
+          console.log('input')
       
         }
 
