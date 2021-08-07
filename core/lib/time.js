@@ -1,5 +1,5 @@
 const moment = require('moment')
-moment.locale('id')
+// moment.locale('id')
 
 const getBaseDate = () => {
   let baseDate = moment().format('DD-MM-YYYY')
@@ -8,7 +8,8 @@ const getBaseDate = () => {
   }
   return baseDate
 }
-
+exports.umur = tgl => moment().diff(moment(tgl, 'MMYY'), 'years', false)
+exports.changeToSlcTgl = tgl => moment(tgl, 'DD/MM/YYYY').format('D MMM YYYY')
 // moment.now = () => +new Date('2021', '2', '28');
 exports._fixTgl = async ({ that }) => {
   for(let [id, konfirm] of that.listConfirms.entries() ){

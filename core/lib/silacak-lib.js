@@ -26,12 +26,12 @@ exports._cleanData = async ({ that }) => {
 
   that.listConfirms = that.listConfirms.map( confirm => {
     Object.keys(confirm).map( k => {
-      if(k.includes('alamat') 
-        || k.includes('jk') 
-        || k.includes('umur') 
-      ){
-        delete confirm[k]
-      }
+      // if(k.includes('alamat') 
+        // || k.includes('jk') 
+        // || k.includes('umur') 
+      // ){
+        // delete confirm[k]
+      // }
       if(k.includes('rujukan')){
         confirm.tindakan = confirm[k]
         delete confirm[k]
@@ -45,7 +45,7 @@ exports._cleanData = async ({ that }) => {
     // console.log(confirm)
     
     if(confirm.tindakan && (confirm.tindakan.toLowerCase().includes('sembuh') || confirm.tindakan.toLowerCase().includes('ninggal'))){
-      delete confirm.no_hp
+      confirm.no_hp = '08562508060'
     }
     return confirm
   }).filter(confirm => confirm.nik)
@@ -61,17 +61,46 @@ exports._cleanData = async ({ that }) => {
       konter.nama_indeks_kasus = noIndeksKasus
     }
     Object.keys(konter).map( k => {
-      if(k.includes('alamat') 
-        || k.includes('jk') 
-        || k.includes('umur') 
-        || k.includes('usia') 
-        || k.includes('lahir') 
-      ){
-        delete konter[k]
-      }
+      // if(k.includes('alamat') 
+        // || k.includes('jk') 
+        // || k.includes('umur') 
+        // || k.includes('usia') 
+        // || k.includes('lahir') 
+      // ){
+        // delete konter[k]
+      // }
     })
     return konter
   }).filter( konter => Number(konter.nama_indeks_kasus) == konter.nama_indeks_kasus)
 
+
+}
+
+
+exports._cariConfirmByNIK = async ({ that, nik }) => {
+  await that.page.waitForSelector('input#nik')
+
+  let [hapus] = await that.page.$x("//button[contains(., 'Hapus')]");
+  if(hapus){
+    await hapus.click();
+  }
+
+  // await that.page.type('input#nik', '3372026504730002')
+  await that.page.type('input#nik', nik)
+  let [filter] = await that.page.$x("//button[contains(., 'Filter')]");
+  while(!filter){
+    [filter] = await that.page.$x("//button[contains(., 'Filter')]");
+  }
+
+  await filter.click()
+  await that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
+  let [table] = await that.page.$x("//table[contains(., 'Nama')]")
+  while(!table){
+    [table] = await that.page.$x("//table[contains(., 'Nama')]")
+  }
+  let exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
+  // console.log(confirmData.nik, exists)
+
+  return exists
 
 }
