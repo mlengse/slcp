@@ -21,8 +21,6 @@ exports._pushConfirm = async ({ that, confirmData }) => {
       await hapus.click();
     }
 
-    // await that.page.waitForSelector('#rc-tabs-1-panel-1 > div:nth-child(2) > div > form:nth-child(1) > button.ant-btn.ant-btn-primary')
-
     // await that.page.type('input#nik', '3372026504730002')
     await that.page.type('input#nik', confirmData.nik)
     let [filter] = await that.page.$x("//button[contains(., 'Filter')]");
@@ -75,10 +73,6 @@ exports._loginSilacak = async ({ that }) => {
 }
 
 exports._initBrowser = async ({ that }) => {
-  // if(that.init){
-    // await that.init()
-  // }
-
   if(!that.Browser) {
     that.Browser = await pptr.launch({
       headless: false,
