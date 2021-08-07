@@ -32,6 +32,7 @@ module.exports = class Core {
     await this.fetchKasus()
     await this.upsertData()
     await this.cleanData()
+    await this.fixTgl()
 
   }
 }

@@ -10,6 +10,41 @@ const getBaseDate = () => {
 }
 
 // moment.now = () => +new Date('2021', '2', '28');
+exports._fixTgl = async ({ that }) => {
+  for(let [id, konfirm] of that.listConfirms.entries() ){
+    Object.keys(konfirm).map( k => {
+      if(k.toLowerCase().includes('tgl') || k.toLowerCase().includes('tanggal')) {
+        if(k.includes('lahir')){
+          delete konfirm[k]
+        } else {
+          if(!(konfirm[k].includes('/') && konfirm[k].length === 10)){
+            if(konfirm[k].includes('/')){
+              if(konfirm[k].split('/')[konfirm[k].split('/').length-1].length === 4){
+                konfirm[k] = moment(konfirm[k], 'D/M/YYYY').format('DD/MM/YYYY') 
+              } else if(konfirm[k].split('/')[konfirm[k].split('/').length-1].length === 2){
+                konfirm[k]=moment(konfirm[k], 'D/M/YY').format('DD/MM/YYYY')
+              } else {
+                that.spinner.fail(`${konfirm.kelurahan}-${konfirm.no} ${k}: ${konfirm[k]}`)
+              }
+            } else if(konfirm[k].includes('-')){
+              if(konfirm[k].split('-')[konfirm[k].split('-').length-2].length === 3){
+                konfirm[k] = moment(konfirm[k], 'D-MMM-YYYY').format('DD/MM/YYYY')
+              } else if(konfirm[k].split('-')[konfirm[k].split('-').length-1].length === 4){
+                konfirm[k] = moment(konfirm[k], 'D-M-YYYY').format('DD/MM/YYYY')
+              } else {
+                that.spinner.fail(`${konfirm.kelurahan}-${konfirm.no} ${k}: ${konfirm[k]}`)
+              }
+            } else {
+              that.spinner.fail(`${konfirm.kelurahan}-${konfirm.no} ${k}: ${konfirm[k]}`)
+            }
+          }
+        }
+      }
+    })
+
+    that.listConfirms[id] = konfirm
+  }
+}
 exports.unixTime = () => moment().format('x')
 exports.getFormat1 = e => moment(e, 'D MMMM YYYY').format('YYYYMMDD')
 exports.getFormat2 = e => moment(e, 'D MMMM YYYY').format('YYYY-MM-DD')
