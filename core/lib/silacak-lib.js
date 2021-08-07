@@ -42,8 +42,9 @@ exports._cleanData = async ({ that }) => {
       }
     })
 
+    // console.log(confirm)
     
-    if(confirm.tindakan.toLowerCase().includes('sembuh') || confirm.tindakan.toLowerCase().includes('ninggal')){
+    if(confirm.tindakan && (confirm.tindakan.toLowerCase().includes('sembuh') || confirm.tindakan.toLowerCase().includes('ninggal'))){
       delete confirm.no_hp
     }
     return confirm

@@ -17,16 +17,16 @@ module.exports = async (isPM2) => {
       let konters = app.listKonters.filter( konter => konter.nama_indeks_kasus === konfirm.no && konter.kelurahan === konfirm.kelurahan)
       if(konters.length){
         await app.pushConfirm({ confirmData: konfirm })
-        app.spinner.succeed(`${num}: ${JSON.stringify(konfirm)}`)
+        // app.spinner.succeed(`${num}: ${JSON.stringify(konfirm)}`)
 
-        app.spinner.succeed(`konter: ${konters.length}`)
+        // app.spinner.succeed(`konter: ${konters.length}`)
 
         let numk = 1
 
         for(let konter of konters) {
           await app.pushKonter({ konterData: konter})
   
-          app.spinner.succeed(`${num}-${numk}: ${JSON.stringify(konter)}`)
+          // app.spinner.succeed(`${num}-${numk}: ${JSON.stringify(konter)}`)
           numk++
 
         }

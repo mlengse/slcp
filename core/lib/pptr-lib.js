@@ -11,6 +11,42 @@ exports._pushConfirm = async ({ that, confirmData }) => {
   if(!confirmData.silacak) {
     // push ke silacak
     await that.loginSilacak()
+
+    if(await that.page.$('#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button')) {
+      await that.page.click('#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button')
+    }
+
+    let [hapus] = await that.page.$x("//button[contains(., 'Hapus')]");
+    if (hapus) {
+      await hapus.click();
+    }
+
+    // await that.page.waitForSelector('#rc-tabs-1-panel-1 > div:nth-child(2) > div > form:nth-child(1) > button.ant-btn.ant-btn-primary')
+
+    // await that.page.type('input#nik', '3372026504730002')
+    await that.page.type('input#nik', confirmData.nik)
+    let [filter] = await that.page.$x("//button[contains(., 'Filter')]");
+    if (filter) {
+      await filter.click()
+      await that.page.waitForTimeout(500)
+      let table = await that.page.$x("//table[contains(., 'Nama')]")
+      if(table[0]){
+        let jso = await that.page.evaluate( el => el.innerText, table[0])
+        if(jso.includes(confirmData.nik)){
+          console.log(jso)
+        } else {
+          let [baru] = await that.page.$x("//button[contains(., 'Catat Kasus')]");
+          if (baru) {
+            await baru.click();
+          }
+      
+        }
+
+      }
+
+    }
+
+
   }
 
 }
@@ -31,161 +67,11 @@ exports._loginSilacak = async ({ that }) => {
     await that.page.type('input#username', that.config.SILACAK_USER)
     await that.page.type('input#password', that.config.SILACAK_PASSWORD, { delay: 100 })
     await that.page.click('button.btn.btn-login[name="loginbtn"][type="submit"]', {delay: 500})
-    await that.page.waitForNavigation(waitOpt),
-      // await that.page.click('button#app.userAuth.signIn')
-  
-    // let inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
-    // while(!inpVal || inpVal.length < 5 ){
-    //   inpVal = await that.page.evaluate(() => document.getElementById('CaptchaInputText').value)
-    // }
-  
-    // const [response] = await Promise.all([
-    //   that.page.waitForNavigation(waitOpt),
-    //   // that.page.type('#CaptchaInputText', String.fromCharCode(13)),
-    //   // that.page.click('#btnLogin', {delay: 500}),
-    //   that.page.click('button.btn.btn-login[name="loginbtn"][type="submit"]', {delay: 500})
-    // ]);
-    
+    await that.page.waitForNavigation(waitOpt)
     that.spinner.succeed('logged in')
   
   }
 
-}
-
-exports._daftarDelete = async ({ that, pendaftar }) => {
-  return await that.page.evaluate( data => {
-    $.ajax({
-      url: base_url + "/EntriDaftarDokkel/DaftarDelete",
-      data: JSON.stringify(data),
-      contentType: "application/json",
-      type: "POST",
-      success: function (data) {
-        if (data.metaData.code === 200) {
-          // riwayatPendaftaran.ajax.reload();
-          showMessage(200, 'Data berhasil di hapus');
-        }
-        else errorHandler(data);
-      },
-      error: function (err) {
-        errorHandler(err.responseJSON);
-      }
-    });
-  }, pendaftar)
-}
-
-exports._getPendaftarByPpkTgl = async ({ that, tgldaftar }) =>{
-  that.spinner.start(`get pendaftar by ppk tgl: ${tgldaftar}`)
-
-  let faskes = that.config.PCAREUSR
-  await that.page.evaluate(async (tgldaftar, faskes) => {
-
-    $('#bulanRiwayat').val(tgldaftar);
-
-    if (riwayatPendaftaran != null) {
-      riwayatPendaftaran.ajax.reload();
-      return riwayatPendaftaran.ajax.json();
-    }
-
-    riwayatPendaftaran = $('#example').DataTable({
-      "processing": true,
-      "serverSide": true,
-      "ordering": false,
-      "searching": false,
-      "lengthChange": false,
-      "pageLength": 1000,
-      "select": {
-        style: 'single'
-      },
-      "scrollX": true,
-      ajax: {
-        url: base_url + '/EntriDaftarDokkel/getPendaftarByPpkTgl',
-        type: "POST",
-        data: function (param) {
-          param.tgldaftar = $('#bulanRiwayat').val();
-          param.refAsalKunjungan = $('#kunjSakitRiwayat').val();
-          param.kdppk = faskes;
-        },
-        dataFilter: dataTablesResponse,
-        error: function (xhr) {
-          errorHandler(JSON.parse(xhr.responseText));
-        }
-      },
-      columnDefs: [
-        {
-          'targets': 8,
-          'render': function (a, b, data, meta) {
-            if (data.status === 0) {
-              return "<div class='btn-group'> " 
-              + "<button type='button' class='btn btnDelete btn btn-danger' onclick=\"chooseDeleteDaftarRiwayat('" + meta.row + "')\"><i class='fa fa-trash'></i></button>" 
-              + "</div>";
-            }
-            return "";
-          }
-        },
-        {
-          'targets': 2,
-          'render': function (a, b, data, meta) {
-            if (data.pesertaProlanis.isProlanis && data.pesertaProlanis.isPesertaPRB) {
-              return "<label style='color:red' title='Peserta Prolanis & PRB'>" + data.peserta.nama + "</label>";
-            } else if (data.pesertaProlanis.isProlanis) {
-              return "<label style='color:#b8ca35' title='Peserta Prolanis Tanpa PRB'>" + data.peserta.nama + "</label>";
-            } else if (data.pesertaProlanis.idPrbDM > 0 || data.pesertaProlanis.idPrbHT > 0) {
-              return "<label style='color:green' title='Peserta PRB'>" + data.peserta.nama + "</label>";
-            }
-            return "<label style='font-weight:normal;'>" + data.peserta.nama + "</label>";
-          }
-        }
-      ],
-      columns: [
-        {
-          data: function (data) {
-            return data.aliasAntrian + data.noUrut;
-          }
-        },
-        { data: 'peserta.noKartu' },
-        {
-          data: function (data) {
-            return data;
-          }
-        },
-        { data: 'peserta.sex' },
-        {
-          data: function (data) {
-            return calcAge(strToDate(data.peserta.tglLahir));
-          }
-        },
-        { data: 'poli.nmPoli' },
-        {
-          data: function (data) {
-            return getSumberPendaftaran(data.fromWs);
-          }
-        },
-        {
-          data: function (data) {
-            return getStatusPendaftaran(data.status);
-          }
-        }
-      ]
-    });
-
-    return riwayatPendaftaran.ajax.json()
-
-  }, tgldaftar, faskes)
-
-  await that.page.waitForTimeout(5000)
-
-  let pendaftar = await that.page.evaluate(() => riwayatPendaftaran.ajax.json())
-
-  if(pendaftar && pendaftar.response && pendaftar.response.data && pendaftar.response.data.length) {
-    that.spinner.succeed(`daftar tgl: ${tgldaftar} jml: ${pendaftar.response.data.length}`)
-    return pendaftar.response.data
-  }
-  return []
-}
-
-
-exports._runScript = async ({ that }) => {
-  await that.loginPcare()
 }
 
 exports._initBrowser = async ({ that }) => {
