@@ -110,9 +110,12 @@ exports._cariConfirmByNIK = async ({ that, nik }) => {
 
   let inputNIK = await that.page.$('input#nik')
 
-  if(!inputNIK){
+  while(!inputNIK){
     await that.page.reload()
-    await that.page.waitForSelector('input#nik')
+    await that.page.waitForTimeout(500)
+    inputNIK = await that.page.$('input#nik')
+
+    // await that.page.waitForSelector('input#nik')
 
   }
 
@@ -124,20 +127,19 @@ exports._cariConfirmByNIK = async ({ that, nik }) => {
   // await that.page.type('input#nik', '3372026504730002')
   await that.page.type('input#nik', nik)
 
-  await that.clickBtn({ text: 'Filter'})
-
-  await that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
+  await Promise.all([
+    that.clickBtn({ text: 'Filter'}),
+    that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
+  ])
 
   // console.log(JSON.stringify(that.response[that.response.length-1].json))
   let [table] = await that.page.$x("//table[contains(., 'Nama')]")
   while(!table){
-    [table] = await that.page.$x("//table[contains(., 'Nama')]")
+    ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
   }
   let exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
   // console.log(confirmData.nik, exists)
-
   return exists
-
 }
 
 exports._cariKonterByNIK = async ({ that, nik }) => {
