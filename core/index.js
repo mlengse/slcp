@@ -9,6 +9,8 @@ module.exports = class Core {
     }
     this.config = config
     this.kunjBlnIni = []
+    this.response = []
+
     for( let func in obj) {
       if(func.includes('_')) {
         this[func.split('_').join('')] = async (...args) => await obj[func](Object.assign({}, ...args, {that: this }))
