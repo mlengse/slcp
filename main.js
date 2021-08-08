@@ -15,7 +15,7 @@ module.exports = async (isPM2) => {
 
     for( let konfirm of app.listConfirms ) {
       let konters = app.listKonters.filter( konter => konter.nama_indeks_kasus === konfirm.no && konter.kelurahan === konfirm.kelurahan)
-      if(konters.length > 0){
+      if(konters.length > 0 && konfirm.kelurahan === 'serengan'){
         await app.pushConfirm({ confirmData: konfirm })
         app.spinner.succeed(`${num}: ${JSON.stringify(konfirm)}`)
 

@@ -25,7 +25,9 @@ exports._upsertData = async ({ that }) => {
 exports._cleanData = async ({ that }) => {
 
   that.listConfirms = that.listConfirms.filter(confirm => confirm.nik && confirm.nik.length === 16 && that.filter14(confirm.tgl_onset)).map( confirm => {
-    confirm.umur = that.umur(confirm.nik.substring(8, 12)).toString()
+    if(!confirm.umur){
+      confirm.umur = that.umur(confirm.nik.substring(8, 12)).toString()
+    }
     if(!confirm.jk){
       confirm.jk = Number(confirm.nik[6]) > 3 ? 'P' : 'L'    
     }
@@ -104,7 +106,14 @@ exports._cleanData = async ({ that }) => {
 
 
 exports._cariConfirmByNIK = async ({ that, nik }) => {
-  await that.page.waitForSelector('input#nik')
+
+  let inputNIK = await that.page.$('input#nik')
+
+  if(!inputNIK){
+    await that.page.reload()
+    await that.page.waitForSelector('input#nik')
+
+  }
 
   let [hapus] = await that.page.$x("//button[contains(., 'Hapus')]");
   if(hapus){

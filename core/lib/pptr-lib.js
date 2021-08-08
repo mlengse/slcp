@@ -8,57 +8,41 @@ exports.waitOpt = waitOpt
 exports._waitNav = async ({ that }) => await that.page.waitForNavigation(waitOpt)
 
 exports._inputTgl = async ({ that, element, tgl }) => {
-  let blnThn = that.changeToSlcBlnThn(tgl)
-
-  await that.page.focus(`#${element}`);
-  await that.page.click(`#${element}`);
-  await that.page.waitForTimeout(500)
-
-  let pickerElements = await that.page.$$('div.ant-picker-dropdown')
-  console.log(pickerElements.length)
-
-  let blnThnDef = await that.page.$$eval('div.ant-picker-header-view', els => [...els][[...els].length-1].innerText)
+  console.log(element, tgl)
+  try{
+    let blnThn = that.changeToSlcBlnThn(tgl)
+    await that.page.click(`#${element}`);
+    await that.page.waitForTimeout(500)
+    const pickerElements = await that.page.$$('div.ant-picker-dropdown')
+    for(let pickerElement of [...pickerElements]){
+      let cl = await pickerElement.evaluate(el => el.getAttribute('class'))
+      if(!cl.includes('hidden')){
+        let slash = that.slashToStrip(tgl)
+        let blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
+        let diff = that.getTglDiff(blnThnDef, blnThn)
+        while (diff < 0 && blnThn !== blnThnDef){
+          await pickerElement.$eval('button.ant-picker-header-prev-btn > span',  l => l.click())
+          blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
+          diff = that.getTglDiff(blnThnDef, blnThn)
+          console.log(element, tgl, blnThn, '|', blnThnDef, diff, cl, slash)
+        }
+        await that.page.waitForTimeout(500)
   
-  let diff = that.getTglDiff(blnThnDef, blnThn)
-  console.log(element, blnThn, '|', blnThnDef, diff)
-
-  let slash = that.slashToStrip(tgl)
-
-  let [td] = await that.page.$x(`//td[contains(@title, '${slash}')]`)
-  while(!td){
-    while (diff < 0 && blnThn !== blnThnDef){
-      await that.page.waitForSelector('div.ant-picker-date-panel > div.ant-picker-header > button.ant-picker-header-prev-btn > span', {
-        visible: true
-      })
-      await that.page.focus('div.ant-picker-date-panel > div.ant-picker-header > button.ant-picker-header-prev-btn > span')
-      await that.page.click('div.ant-picker-date-panel > div.ant-picker-header > button.ant-picker-header-prev-btn > span')
-  
-      await that.page.waitForTimeout(500)
-  
-      blnThnDef = await that.page.$$eval('div.ant-picker-header-view', els => [...els][[...els].length-1].innerText)
-
-      console.log(element, blnThn, '|', blnThnDef, diff)
-
-      diff = that.getTglDiff(blnThnDef, blnThn)
-      console.log(element, blnThn, '|', blnThnDef, diff)
+        let [td] = await pickerElement.$x(`//td[contains(@title, '${slash}')]`)
+        let tgll = await td.evaluate( el => el.innerText)
+        console.log(tgll, slash)
+        await td.evaluate( l => l.click())
+        await that.page.waitForTimeout(500)
+      }
     }
-
-    // await that.page.waitForTimeout(500)
+  
+  }catch(e){
+    await that.page.click('#root > section > section > main > div')
+    await that.page.waitForTimeout(500)
+    await that.inputTgl({ element, tgl })
   }
-
-  [td] = await that.page.$x(`//td[contains(@title, '${slash}')]`)
-  await td.focus()
-  // await that.page.waitForTimeout(500)
-  await td.click()
-
-  // await that.page.waitForTimeout(10000)
-
-  // await that.page.$eval(`#${element}`,(e) => e.removeAttribute("readonly"))
-
-  // await that.page.evaluate( (element, tgl) => {
-  //   document.getElementById(element).value = tgl
-  // }, element, tgl)
-
+  return
+  // await that.page.waitForTimeout(5000)
 }
 
 exports._pilihOpsi = async ({ that, element, pilihan }) => {
@@ -68,11 +52,16 @@ exports._pilihOpsi = async ({ that, element, pilihan }) => {
 
   let num = Number(pilihan) - 1
 
+  // console.log(num)
+
   while(num){
     await that.page.keyboard.press('ArrowDown')
     await that.page.waitForTimeout(500)
     num--
   }
+
+  await that.page.keyboard.press('Enter')
+
 
 }
 
@@ -156,10 +145,20 @@ exports._gotoKonterTab = async({ that }) => {
 
 exports._pushKonter = async ({ that, konterData, confirmData }) => {
   if(!konterData.silacak) {
-    await that.loginSilacak()
+    await that.page.waitForTimeout(500);
 
-    if(!confirmData.href){
+    let isKonterInput = await that.page.$('#casenrollment_date')
+
+    while(!isKonterInput){
+      await that.loginSilacak()
+
+      await that.page.reload()
+
       let [row] = await that.page.$x(`//tr[contains(.,'${confirmData.nik}')]`)
+      while(!row){
+        await that.page.waitForTimeout(500);
+        [row] = await that.page.$x(`//tr[contains(.,'${confirmData.nik}')]`)
+      }
       let hrefEl = await row.$('td > a')
       let href = await that.page.evaluate( el => el.getAttribute('href').split('/')[el.getAttribute('href').split('/').length-1], hrefEl)
   
@@ -169,19 +168,25 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
   
       await that.page.waitForResponse(response=> response.url().includes(href) && response.status() === 200)
   
-      confirmData.href = href
+      if(!confirmData.href){
+        confirmData.href = href
+      }  
+
+      await that.gotoKonterTab()
+
+      // let exists = await that.cariKonterByNIK({ nik: konterData.nik})
+  
+      // console.log(exists, konter)
+  
+      await that.clickBtn({ text: 'Tambah'})
+  
+      await that.page.waitForSelector('#casenrollment_date')
+  
+      isKonterInput = await that.page.$('#casenrollment_date')
   
     }
 
-    await that.gotoKonterTab()
-
-    // let exists = await that.cariKonterByNIK({ nik: konterData.nik})
-
-    // console.log(exists, konter)
-
-    await that.clickBtn({ text: 'Tambah'})
-
-    await that.page.waitForSelector('#casenrollment_date')
+    console.log('siap input')
 
     await that.inputTgl({
       element: 'casenrollment_date',
@@ -219,37 +224,43 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
       tgl: konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus
     })
 
+    // await that.page.click('#root > section > section > main > div')
+
     await that.inputTgl({
       element: 'ContactFactorForm_CcijMqQR3tM',
-      tgl: konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus
+      tgl: that.kurang1(konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus)
     })
 
-    // await that.pilihOpsi({
-    //   element: 'ContactFactorForm_iZ4G8QnSTqB',
-    //   pilihan: konterData.hubungan_dengan_indeks_kasus
-    // })
+    // await that.page.click('#root > section > section > main > div')
+
+    await that.inputTgl({
+      element: 'ContactFactorForm_eventEntryReqDate',
+      tgl: that.tambah1(konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus)
+    })
+
+    // await that.page.click('#root > section > section > main > div')
+
+    await that.inputTgl({
+      element: 'ContactFactorForm_eventExitReqDate',
+      tgl: that.tambah6(konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus)
+    })
+
+    await that.pilihOpsi({
+      element: 'ContactFactorForm_iZ4G8QnSTqB',
+      pilihan: konterData.hubungan_dengan_indeks_kasus
+    })
 
     
-    // await that.pilihOpsi({
-    //   element: 'ContactFactorForm_Y6Iseq8vUlU',
-    //   pilihan: konterData.kategori_kontak_erat
-    // })
+    await that.pilihOpsi({
+      element: 'ContactFactorForm_Y6Iseq8vUlU',
+      pilihan: konterData.kategori_kontak_erat
+    })
 
-    // await that.inputTgl({
-    //   element: 'ContactFactorForm_eventEntryReqDate',
-    //   tgl: that.tambah1(konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus)
-    // })
+    await that.clickBtn({ text: 'Simpan'})
 
-    // await that.inputTgl({
-    //   element: 'ContactFactorForm_eventExitReqDate',
-    //   tgl: that.tambah6(konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus)
-    // })
+    // await that.page.waitForResponse(response=> response.status() === 200)
 
-    // await that.clickBtn({ text: 'Simpan'})
-
-    await that.page.waitForResponse(response=> response.status() === 200)
-
-    await that.page.waitForTimeout(5000)
+    await that.page.waitForTimeout(500)
 
     return confirmData
 
