@@ -46,6 +46,8 @@ exports._fixTgl = async ({ that }) => {
             } else {
               that.spinner.fail(`${konfirm.kelurahan}-${konfirm.no} ${k}: ${konfirm[k]}`)
             }
+          } else {
+            // that.spinner.fail(`${konfirm.kelurahan}-${konfirm.no} ${k}: ${konfirm[k]}`)
           }
         }
       }

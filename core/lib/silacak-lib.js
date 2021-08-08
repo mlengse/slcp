@@ -25,6 +25,7 @@ exports._upsertData = async ({ that }) => {
 exports._cleanData = async ({ that }) => {
 
   that.listConfirms = that.listConfirms.filter(confirm => confirm.nik && confirm.nik.length === 16 && that.filter14(confirm.tgl_onset)).map( confirm => {
+    // console.log(confirm.tgl_onset)
     if(!confirm.umur){
       confirm.umur = that.umur(confirm.nik.substring(8, 12)).toString()
     }

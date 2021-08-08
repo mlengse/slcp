@@ -7,42 +7,86 @@ const waitOpt = {
 exports.waitOpt = waitOpt      
 exports._waitNav = async ({ that }) => await that.page.waitForNavigation(waitOpt)
 
+exports._isVisible = async ({ that, el }) => {
+  return await that.page.evaluate( elem => {
+    if (!(elem instanceof Element)) throw Error('DomUtil: elem is not an element.');
+    const style = getComputedStyle(elem);
+    if (style.display === 'none') return false;
+    if (style.visibility !== 'visible') return false;
+    if (style.opacity < 0.1) return false;
+    if (elem.offsetWidth + elem.offsetHeight + elem.getBoundingClientRect().height +
+        elem.getBoundingClientRect().width === 0) {
+        return false;
+    }
+    const elemCenter   = {
+        x: elem.getBoundingClientRect().left + elem.offsetWidth / 2,
+        y: elem.getBoundingClientRect().top + elem.offsetHeight / 2
+    };
+    if (elemCenter.x < 0) return false;
+    if (elemCenter.x > (document.documentElement.clientWidth || window.innerWidth)) return false;
+    if (elemCenter.y < 0) return false;
+    if (elemCenter.y > (document.documentElement.clientHeight || window.innerHeight)) return false;
+    let pointContainer = document.elementFromPoint(elemCenter.x, elemCenter.y);
+    do {
+        if (pointContainer === elem) return true;
+    } while (pointContainer = pointContainer.parentNode);
+    return false;
+  }, el)
+}
+
+exports._getPicker =  async ({ that }) => {
+  let pickerElements = await that.page.$$('div.ant-picker-dropdown')
+  let pickerElement
+  for(let pick of [...pickerElements]){
+    let cl = await that.isVisible({ el: pick})
+    if(cl){
+      pickerElement = pick
+    }
+  }
+
+  return pickerElement
+
+}
+
 exports._inputTgl = async ({ that, element, tgl }) => {
   console.log(element, tgl)
-  try{
-    let blnThn = that.changeToSlcBlnThn(tgl)
-    await that.page.click(`#${element}`);
+  let blnThn = that.changeToSlcBlnThn(tgl)
+  await that.page.click(`#${element}`);
+  await that.page.waitForTimeout(500)
+
+  let pickerElement = await that.getPicker()
+  let slash = that.slashToStrip(tgl)
+  let blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
+  let diff = that.getTglDiff(blnThnDef, blnThn)
+  let left = await pickerElement.$('button.ant-picker-header-prev-btn > span')
+  while (diff < 0 && blnThn !== blnThnDef){
+    pickerElement = await that.getPicker()
+    blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
+    diff = that.getTglDiff(blnThnDef, blnThn)
+    left = await pickerElement.$('button.ant-picker-header-prev-btn > span')
+    await left.click()
     await that.page.waitForTimeout(500)
-    const pickerElements = await that.page.$$('div.ant-picker-dropdown')
-    for(let pickerElement of [...pickerElements]){
-      let cl = await pickerElement.evaluate(el => el.getAttribute('class'))
-      if(!cl.includes('hidden')){
-        let slash = that.slashToStrip(tgl)
-        let blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
-        let diff = that.getTglDiff(blnThnDef, blnThn)
-        while (diff < 0 && blnThn !== blnThnDef){
-          await pickerElement.$eval('button.ant-picker-header-prev-btn > span',  l => l.click())
-          blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
-          diff = that.getTglDiff(blnThnDef, blnThn)
-          console.log(element, tgl, blnThn, '|', blnThnDef, diff, cl, slash)
-        }
-        await that.page.waitForTimeout(500)
-  
-        let [td] = await pickerElement.$x(`//td[contains(@title, '${slash}')]`)
-        let tgll = await td.evaluate( el => el.innerText)
-        console.log(tgll, slash)
-        await td.evaluate( l => l.click())
-        await that.page.waitForTimeout(500)
-      }
-    }
-  
-  }catch(e){
-    await that.page.click('#root > section > section > main > div')
-    await that.page.waitForTimeout(500)
-    await that.inputTgl({ element, tgl })
+    blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
+    diff = that.getTglDiff(blnThnDef, blnThn)
+    console.log(element, tgl, blnThn, '|', blnThnDef, diff, slash)
   }
-  return
-  // await that.page.waitForTimeout(5000)
+  await that.page.waitForTimeout(500)
+  let td, tgll
+  while(!td){
+    let tds = await that.page.$x(`//td[contains(@title, '${slash}')]`)
+    for(let tt of tds){
+      let tdVis = await that.isVisible({ el: tt })
+      if(tdVis){
+        td = tt
+        tgll = await td.evaluate( el => el.innerText)
+      }
+      console.log(tdVis, tgll, slash)
+    }
+    await that.page.waitForTimeout(500)
+  
+  }
+  await td.click()
+  await that.page.waitForTimeout(500)
 }
 
 exports._pilihOpsi = async ({ that, element, pilihan }) => {
@@ -258,9 +302,9 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
 
     await that.clickBtn({ text: 'Simpan'})
 
-    // await that.page.waitForResponse(response=> response.status() === 200)
+    await that.page.waitForResponse(response=> response.status() === 200)
 
-    await that.page.waitForTimeout(500)
+    // await that.page.waitForTimeout(500)
 
     return confirmData
 
