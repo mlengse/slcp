@@ -72,6 +72,7 @@ exports._inputTgl = async ({ that, element, tgl }) => {
   }
   await that.page.waitForTimeout(500)
   let td, tgll
+  let num = 0
   while(!td){
     let tds = await that.page.$x(`//td[contains(@title, '${slash}')]`)
     for(let tt of tds){
@@ -83,7 +84,11 @@ exports._inputTgl = async ({ that, element, tgl }) => {
       console.log(tdVis, tgll, slash)
     }
     await that.page.waitForTimeout(500)
-  
+    if(num%20 === 0){
+      tgl = that.kurang1(tgl)
+      slash = that.slashToStrip(tgl)
+    }
+    num++
   }
   await td.click()
   await that.page.waitForTimeout(500)
@@ -129,6 +134,7 @@ exports._pushConfirm = async ({ that, confirmData }) => {
     let exists = await that.cariConfirmByNIK({ nik: confirmData.nik})
 
     if(!exists){
+      
       await that.clickBtn({ text: 'Catat Kasus' })
 
       await that.page.waitForSelector('#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button')
@@ -169,6 +175,8 @@ exports._pushConfirm = async ({ that, confirmData }) => {
 
       await that.page.waitForResponse(response=> response.status() === 200)
       // await that.page.waitForTimeout(5000)
+
+      await that.page.reload()
 
     } 
   }
