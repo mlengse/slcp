@@ -9,9 +9,10 @@ const app = new Core(config)
 module.exports = async (isPM2) => {
 
   try{
-    await app.init()
-
-    let num = 1
+    this.spinner.start('init apps')
+    await this.fetchKasus()
+    await this.cleanData()
+    // await this.upsertData()
 
     // for( let konfirm of app.listConfirms ) {
     //   app.spinner.succeed(`${num}: ${JSON.stringify(konfirm)}`)

@@ -29,12 +29,4 @@ module.exports = class Core {
     this.spinner.succeed(`closed apps: ${new Date()}`)
   }
 
-  async init() {
-    this.spinner.start('init apps')
-    await this.fetchKasus()
-    await this.cleanData()
-    // await this.upsertData()
-    // await this.fixTgl()
-
-  }
 }
