@@ -105,21 +105,21 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
 
     await that.inputTgl({
       element: 'ContactFactorForm_CcijMqQR3tM',
-      tgl: that.kurang1(konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus)
+      tgl: konterData.konter_tanggal_kontak_dengan_indeks_kasus
     })
 
     // await that.page.click('#root > section > section > main > div')
 
     await that.inputTgl({
       element: 'ContactFactorForm_eventEntryReqDate',
-      tgl: that.tambah1(konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus)
+      tgl: konterData.konter_tgl_entry_test
     })
 
     // await that.page.click('#root > section > section > main > div')
 
     await that.inputTgl({
       element: 'ContactFactorForm_eventExitReqDate',
-      tgl: that.tambah6(konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus)
+      tgl: konterData.konter_tgl_exit_test
     })
 
     await that.pilihOpsi({

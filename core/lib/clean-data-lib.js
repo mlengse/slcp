@@ -1,14 +1,12 @@
-exports._checkIndeksKasus = async({that, person}) => that.people[Object.keys(that.people).filter(nik => that.people[nik].isKonfirm && that.people[nik].konfirm_kelurahan === person.konter_kelurahan && that.people[nik].konfirm_no === person.konter_indeks)[0]]
-
 exports._cleanData = async ({ that }) => {
   that.spinner.start(`cleanData`)
-
+  await that.fixTgl()
 
   for(let nik of Object.keys(that.people)){
     let person = that.people[nik]
 
     if(person.isKonfirm){
-      that.spinner.start(`konfirm_tgl_onset: ${person.konfirm_tgl_onset}`)
+      // that.spinner.start(`konfirm_tgl_onset: ${person.konfirm_tgl_onset}`)
       if(!person.umur){
         person.umur = that.umur(person.nik.substring(8, 12)).toString()
       }
@@ -52,11 +50,32 @@ exports._cleanData = async ({ that }) => {
       person.jk = person.jk.toLowerCase() === 'l' ? 'Laki' : 'Perempuan'
 
       Object.keys(person).map( k => {
-        if(k.includes('konter') && k.includes('indeks') && !k.includes('hubungan')){
+        if(k.includes('indeks') && !k.includes('hubungan')){
           person.konter_indeks = person[k]
           delete person[k]
         }
+        if(k.includes('tgl') || k.includes('tanggal')){
+          if(k.includes('kontak')){
+            person.konter_tgl_kontak = person[k]
+          }
+          if(k.includes('entry')){
+            person.konter_tgl_entry = person[k]
+          }
+          if(k.includes('exit')){
+            person.konter_tgl_exit = person[k]
+          }
+        } 
       })
+
+      if(!person.konter_tgl_kontak){
+        person.konter_tgl_kontak = that.kurang1(person.konter_tanggal_wawancara || person.konter_tanggal_lapor)
+      }
+      if(!person.konter_tgl_entry){
+        person.konter_tgl_entry = that.tambah1(person.konter_tanggal_wawancara || person.konter_tanggal_lapor)
+      }
+      if(!person.konter_tgl_exit){
+        person.konter_tgl_exit = that.tambah6(person.konter_tanggal_wawancara || person.konter_tanggal_lapor)
+      }
 
       if(person.konter_indeks && person.konter_indeks.toLowerCase().includes('no')){
         let noIndeksKasus = person.konter_indeks.toLowerCase().split('no')
@@ -76,41 +95,41 @@ exports._cleanData = async ({ that }) => {
         person.konter_no_hp = `0${person.konter_no_hp}`
       }
     }
+    that.people[nik] = Object.assign({}, that.people[nik], person)
 
   // that.listKonters = that.listKonters.filter( konter => konter.nik && konter.nik.length === 16 && Object.keys( konter ).filter( e => e.includes('nama_indeks')).length).map( konter => {
   // }).filter( konter => Number(konter.nama_indeks_kasus) == konter.nama_indeks_kasus)
   }
 
-  let num = 0
 
+
+  //cari terkonfirmasi yg bukan konter
+  that.indeksKasus = []
   for(let nik of Object.keys(that.people)){
-
     let person = that.people[nik]
-
-    let anc = 0
-    if(person.isKonter && person.isKonfirm){
-      num++
-    }
-
-    while(person && person.isKonter && person.isKonfirm){
-      anc++
-
-      that.spinner.succeed(`(${num}.${anc}) nik ${nik} ${person.nama} konter_kelurahan ${person.konter_kelurahan} indeks_kasus ${person.konter_indeks}`) //person ${JSON.stringify(person)}`)
-
-      person = await that.checkIndeksKasus({person})
-
-      if(person && !person.isKonter ){
-        anc++
-        that.spinner.succeed(`(${num}.${anc}) nik ${nik} => ${person.nik} ${person.nama} konfirm_kelurahan ${person.konfirm_kelurahan}`)
+    if(person && person.isKonfirm && !person.isKonter ){
+      if(that.indeksKasus.indexOf(person.nik) < 0){
+        that.indeksKasus.push(person.nik)
       }
-
     }
-  
-
   }
 
+  //urutkan indeks kasus bedasarkan ttgl onset
+  that.indeksKasus.sort( (a,b) => that.sortDate(that.people[a].konfirm_tgl_onset) - that.sortDate(that.people[b].konfirm_tgl_onset))
 
+  //tambah konter masing2 indeks kasus
+  let cp = [...that.indeksKasus]
+  for(let iknik of cp){
+    let konters = Object.keys(that.people).filter( nik => that.people[nik].isKonter && that.people[nik].konter_indeks && that.people[nik].konter_indeks === that.people[iknik].konfirm_no)
+    konters.sort( (a,b) => that.sortDate(that.people[a].konter_tgl_kontak) - that.sortDate(that.people[b].konter_tgl_kontak))
+    that.indeksKasus.splice(that.indeksKasus.indexOf(iknik)+1, 0, ...konters)
+  }
 
+  let num = 0
+  that.indeksKasus.map((iknik) => {
+    if(that.people[iknik].isKonfirm && !that.people[iknik].isKonter){
+      num++
+    }
+    that.spinner.succeed(`${num} ${that.people[iknik].nama}${that.people[iknik].isKonter ? ` konter tgl_kontak ${that.people[iknik].konter_tgl_kontak}` : ''}${that.people[iknik].isKonfirm && that.people[iknik].isKonter? ' =>' : ''}${that.people[iknik].isKonfirm ? ` konfirm tgl_onset ${that.people[iknik].konfirm_tgl_onset}` : ''}`)
+  })
 }
-
-
