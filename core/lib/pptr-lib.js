@@ -84,7 +84,7 @@ exports._inputTgl = async ({ that, element, tgl }) => {
     await that.page.waitForTimeout(500)
     blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
     diff = that.getTglDiff(blnThnDef, blnThn)
-    console.log(element, tgl, blnThn, '|', blnThnDef, diff, slash)
+    that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
   }
   // await that.page.waitForTimeout(500)
   let td, tgll
@@ -144,7 +144,7 @@ exports._pushConfirm = async ({ that, confirmData }) => {
 
     if(!exists){
 
-      await that.cariKonterByNIK({ nik: confirmData.nik})
+      // await that.cariKonterByNIK({ nik: confirmData.nik})
       
       await that.catatKonfirmasiBaru({confirmData})
       await that.page.reload()
@@ -209,7 +209,7 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
   
     }
 
-    console.log('siap input')
+    that.spinner.start('siap input')
 
     await that.inputTgl({
       element: 'casenrollment_date',

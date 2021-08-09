@@ -147,6 +147,8 @@ exports._cariConfirmByNIK = async ({ that, nik }) => {
 exports._cariKonterByNIK = async ({ that, nik }) => {
   that.spinner.start(`cariKonterByNIK`)
 
+  await that.page.waitForTimeout(1000)
+
   await that.page.reload()
 
   await that.findXPathAndClick({ xpath: `//span[contains(.,'2. Kontak Erat')]`})
@@ -197,11 +199,8 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
 
   for (let periksa of await that.page.$x(`//button[contains(.,'Periksa')]`)){
     if (await that.isVisible({ el: periksa})){
-      await Promise.all([
-        periksa.click(),
-        that.page.waitForResponse(response=> response.url().includes(confirmData.nik) && response.status() === 200)
-      ])
-
+      await periksa.click()
+      await that.page.waitForResponse(response=> response.url().includes(confirmData.nik) && response.status() === 200)
     }
   }
 
@@ -224,10 +223,10 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
       element: 'ContactFactorForm_eventDate',
       tgl: confirmData.tgl_onset
     })
-    await Promise.all([
-      that.clickBtn({ text: 'Simpan'}),
-      that.page.waitForResponse(response=> response.status() === 200)
-    ])
+      
+    await that.clickBtn({ text: 'Simpan'})
+      
+    await that.page.waitForResponse(response=> response.status() === 200)
     // await that.page.waitForTimeout(5000)
   } else {
     let existsAsKonter = await that.cariKonterByNIK({ nik: confirmData.nik})
