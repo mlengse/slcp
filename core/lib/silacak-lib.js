@@ -1,4 +1,5 @@
 exports._upsertData = async ({ that }) => {
+  that.spinner.start(`upsertData`)
   if(that.config.ARANGODB_DB) for(let [konfirmId, konfirm] of that.listConfirms.entries()) {
     let confirmData = await that.arangoUpsert({
       coll: 'konfirm',
@@ -19,13 +20,13 @@ exports._upsertData = async ({ that }) => {
       that.listKonters[konterId] = konterData.NEW
     }
   }
-
 }
 
 exports._cleanData = async ({ that }) => {
+  that.spinner.start(`cleanData`)
 
   that.listConfirms = that.listConfirms.filter(confirm => confirm.nik && confirm.nik.length === 16 && that.filter14(confirm.tgl_onset)).map( confirm => {
-    // console.log(confirm.tgl_onset)
+    that.spinner.start(`confirm.tgl_onset: ${confirm.tgl_onset}`)
     if(!confirm.umur){
       confirm.umur = that.umur(confirm.nik.substring(8, 12)).toString()
     }
@@ -107,6 +108,7 @@ exports._cleanData = async ({ that }) => {
 
 
 exports._cariConfirmByNIK = async ({ that, nik }) => {
+  that.spinner.start(`cariConfirmByNIK`)
 
   let inputNIK = await that.page.$('input#nik')
 
@@ -138,24 +140,28 @@ exports._cariConfirmByNIK = async ({ that, nik }) => {
     ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
   }
   let exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
-  // console.log(confirmData.nik, exists)
+  that.spinner.succeed(`cariConfirmByNIK nik: ${nik}, exists: ${exists}`)
   return exists
 }
 
 exports._cariKonterByNIK = async ({ that, nik }) => {
+  that.spinner.start(`cariKonterByNIK`)
 
+  await that.page.reload()
 
-  // await that.page.waitForTimeout(5000)
+  await that.findXPathAndClick({ xpath: `//span[contains(.,'2. Kontak Erat')]`})
 
-  // await that.page.waitForSelector('#nik')
-  // await that.page.type('input#nik', '3372026504730002')
-  // await that.page.type('#nik', nik)
+  // // await that.page.waitForTimeout(5000)
 
-  // console.log('mau klik')
+  await that.page.waitForSelector('#nik')
+  // // await that.page.type('input#nik', '3372026504730002')
+  await that.page.type('#nik', nik)
 
-  // await that.clickBtn({ text: 'Filter'})
+  // // console.log('mau klik')
 
-  // console.log('filter')
+  await that.clickBtn({ text: 'Filter'})
+
+  // // console.log('filter')
 
   await that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
   let [table] = await that.page.$x("//table[contains(., 'Nama')]")
@@ -164,7 +170,76 @@ exports._cariKonterByNIK = async ({ that, nik }) => {
   }
   let exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
   // console.log(confirmData.nik, exists)
+  that.spinner.succeed(`cariKonterByNIK ${nik} exists: ${exists}`)
 
   return exists
+
+}
+
+exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
+  that.spinner.start(`catatKonfirmasiBaru`)
+  await that.clickBtn({ text: 'Catat Kasus' })
+
+  await that.page.waitForSelector('#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button')
+  that.spinner.start(`input: confirmData.nik: ${confirmData.nik}, confirmData.nama: ${confirmData.nama}`)
+
+  await that.inputTgl({
+    element: 'casenrollment_date',
+    tgl: confirmData.tgl_onset
+  })
+  // await that.page.waitForTimeout(5000)
+
+  await that.clickSelanjutnya()
+
+  // await that.page.waitForSelector('#CovidCaseProfileForm_mHwPpgxFDge')
+
+  await that.page.type('#CovidCaseProfileForm_mHwPpgxFDge', confirmData.nik)
+
+  for (let periksa of await that.page.$x(`//button[contains(.,'Periksa')]`)){
+    if (await that.isVisible({ el: periksa})){
+      await Promise.all([
+        periksa.click(),
+        that.page.waitForResponse(response=> response.url().includes(confirmData.nik) && response.status() === 200)
+      ])
+
+    }
+  }
+
+  that.spinner.succeed(that.response)
+
+  if(that.response.includes(confirmData.nik) && that.response.toLowerCase().includes('belum')){
+    let nama = await that.getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
+    if(!nama.length){
+      await that.page.type('#CovidCaseProfileForm_GdwLfGObIRT', confirmData.nama)
+      await that.page.type('#CovidCaseProfileForm_fk5drl1hTvc', confirmData.umur)
+      await that.page.type('#CovidCaseProfileForm_quJD4An7Kmi', confirmData.alamat_sesuai_identitas)
+      await that.page.type('#CovidCaseProfileForm_e25qAod3KTg', confirmData.alamat_domisili)
+      let jkbtn = await that.page.$x(`//label[contains(., '${confirmData.jk}')]`)
+      jkbtn[0] && await jkbtn[0].click()
+    }
+    await that.page.type('#CovidCaseProfileForm_YlOp8W4FYRH', confirmData.no_hp)
+    await that.clickSelanjutnya()
+    await that.page.waitForSelector('#ContactFactorForm_eventDate')
+    await that.inputTgl({
+      element: 'ContactFactorForm_eventDate',
+      tgl: confirmData.tgl_onset
+    })
+    await Promise.all([
+      that.clickBtn({ text: 'Simpan'}),
+      that.page.waitForResponse(response=> response.status() === 200)
+    ])
+    // await that.page.waitForTimeout(5000)
+  } else {
+    let existsAsKonter = await that.cariKonterByNIK({ nik: confirmData.nik})
+  }
+
+  // let nikFindResponses = await that.response.filter( resp => resp.url.includes(confirmData.nik))
+
+  // console.log(nikFindResponses[nikFindResponses.length-1].response)
+
+
+  // await that.page.waitForTimeout(5000)
+  that.spinner.succeed(`catatKonfirmasiBaru ${confirmData.nik}`)
+
 
 }

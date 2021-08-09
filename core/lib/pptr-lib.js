@@ -7,6 +7,19 @@ const waitOpt = {
 exports.waitOpt = waitOpt      
 exports._waitNav = async ({ that }) => await that.page.waitForNavigation(waitOpt)
 
+exports._getInnerText = async({ that, el}) => await that.page.evaluate( el => el.innerText, el)
+
+exports._findXPathAndClick = async ({ that, xpath }) => {
+  that.spinner.start(`findXPathAndClick ${xpath}`)
+  for(let el of await that.page.$x(xpath)){
+    if(await that.isVisible({ el })){
+      await el.focus()
+      await el.click()
+    }
+  }
+
+}
+
 exports._isVisible = async ({ that, el }) => {
   return await that.page.evaluate( elem => {
     if (!(elem instanceof Element)) throw Error('DomUtil: elem is not an element.');
@@ -35,13 +48,17 @@ exports._isVisible = async ({ that, el }) => {
 }
 
 exports._getPicker =  async ({ that }) => {
+  that.spinner.start(`getPicker`)
   let pickerElements = await that.page.$$('div.ant-picker-dropdown')
   let pickerElement
-  for(let pick of [...pickerElements]){
-    let cl = await that.isVisible({ el: pick})
-    if(cl){
-      pickerElement = pick
+  while(!pickerElement){
+    for(let pick of [...pickerElements]){
+      let cl = await that.isVisible({ el: pick})
+      if(cl){
+        pickerElement = pick
+      }
     }
+  
   }
 
   return pickerElement
@@ -49,13 +66,12 @@ exports._getPicker =  async ({ that }) => {
 }
 
 exports._inputTgl = async ({ that, element, tgl }) => {
-  console.log(element, tgl)
+  that.spinner.start(`element: ${element}, tgl: ${tgl}`)
   let blnThn = that.changeToSlcBlnThn(tgl)
   await that.page.click(`#${element}`);
-  await that.page.waitForTimeout(500)
-
-  let pickerElement = await that.getPicker()
+  // await that.page.waitForTimeout(500)
   let slash = that.slashToStrip(tgl)
+  let pickerElement = await that.getPicker()
   let blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
   let diff = that.getTglDiff(blnThnDef, blnThn)
   let left = await pickerElement.$('button.ant-picker-header-prev-btn > span')
@@ -70,7 +86,7 @@ exports._inputTgl = async ({ that, element, tgl }) => {
     diff = that.getTglDiff(blnThnDef, blnThn)
     console.log(element, tgl, blnThn, '|', blnThnDef, diff, slash)
   }
-  await that.page.waitForTimeout(500)
+  // await that.page.waitForTimeout(500)
   let td, tgll
   let num = 0
   while(!td){
@@ -81,9 +97,9 @@ exports._inputTgl = async ({ that, element, tgl }) => {
         td = tt
         tgll = await td.evaluate( el => el.innerText)
       }
-      console.log(tdVis, tgll, slash)
+      that.spinner.start(`tdVis: ${tdVis}, tgll: ${tgll}, slash: ${slash}`)
     }
-    await that.page.waitForTimeout(500)
+    // await that.page.waitForTimeout(500)
     if(num%20 === 0){
       tgl = that.kurang1(tgl)
       slash = that.slashToStrip(tgl)
@@ -91,7 +107,7 @@ exports._inputTgl = async ({ that, element, tgl }) => {
     num++
   }
   await td.click()
-  await that.page.waitForTimeout(500)
+  // await that.page.waitForTimeout(500)
 }
 
 exports._pilihOpsi = async ({ that, element, pilihan }) => {
@@ -116,17 +132,10 @@ exports._pilihOpsi = async ({ that, element, pilihan }) => {
 
 exports._clickSelanjutnya = async({ that }) => await that.clickBtn({ text: 'Selanjutnya' })
 
-exports._clickBtn = async({ that, text}) => {
-  let [btn] = await that.page.$x(`//button[contains(., '${text}')]`);
-  while(!btn){
-    [btn] = await that.page.$x(`//button[contains(., '${text}')]`);
-  }
-  await btn.focus();
-  await btn.click();
-
-}
+exports._clickBtn = async({ that, text}) => await that.findXPathAndClick({xpath: `//button[contains(., '${text}')]`});
 
 exports._pushConfirm = async ({ that, confirmData }) => {
+  that.spinner.start(`pushConfirm`)
   if(!confirmData.silacak) {
     // push ke silacak
     await that.loginSilacak()
@@ -134,48 +143,10 @@ exports._pushConfirm = async ({ that, confirmData }) => {
     let exists = await that.cariConfirmByNIK({ nik: confirmData.nik})
 
     if(!exists){
+
+      await that.cariKonterByNIK({ nik: confirmData.nik})
       
-      await that.clickBtn({ text: 'Catat Kasus' })
-
-      await that.page.waitForSelector('#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button')
-      // console.log('input', confirmData.nik, confirmData.nama)
-
-      await that.inputTgl({
-        element: 'casenrollment_date',
-        tgl: confirmData.tgl_onset
-      })
-      // await that.page.waitForTimeout(5000)
-
-      await that.clickSelanjutnya()
-
-      await that.page.waitForSelector('#CovidCaseProfileForm_mHwPpgxFDge')
-
-      await that.page.type('#CovidCaseProfileForm_mHwPpgxFDge', confirmData.nik)
-      await that.page.type('#CovidCaseProfileForm_GdwLfGObIRT', confirmData.nama)
-
-      await that.page.type('#CovidCaseProfileForm_fk5drl1hTvc', confirmData.umur)
-      await that.page.type('#CovidCaseProfileForm_quJD4An7Kmi', confirmData.alamat_sesuai_identitas)
-      await that.page.type('#CovidCaseProfileForm_e25qAod3KTg', confirmData.alamat_domisili)
-      await that.page.type('#CovidCaseProfileForm_YlOp8W4FYRH', confirmData.no_hp)
-
-
-      let jkbtn = await that.page.$x(`//label[contains(., '${confirmData.jk}')]`)
-      jkbtn[0] && await jkbtn[0].click()
-
-      await that.clickSelanjutnya()
-
-      await that.page.waitForSelector('#ContactFactorForm_eventDate')
-
-      await that.inputTgl({
-        element: 'ContactFactorForm_eventDate',
-        tgl: confirmData.tgl_onset
-      })
-
-      await that.clickBtn({ text: 'Simpan'})
-
-      await that.page.waitForResponse(response=> response.status() === 200)
-      // await that.page.waitForTimeout(5000)
-
+      await that.catatKonfirmasiBaru({confirmData})
       await that.page.reload()
 
     } 
@@ -345,16 +316,18 @@ exports._initBrowser = async ({ that }) => {
     })
     that.pages = await that.Browser.pages()
     that.page = that.pages[0]
+    that.response = ''
     that.page.on('response', async response => {
       if(response.status() === 200 && response.request().resourceType()=== 'xhr' && response.url().includes('.json')){
-        let json = await response.json()
-        that.response.push({
-          url: response.url(),
-          json
-        })
-  //     console.log(JSON.stringify(json))
+        for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
+          let notif = await that.page.evaluate( el => el.innerText, el)
+          if(notif && notif.length){
+            that.response = notif
+          }
+        }
       }
     })
+    
     await that.page.goto(`${that.config.SILACAK_URL}`, waitOpt)
     
   }

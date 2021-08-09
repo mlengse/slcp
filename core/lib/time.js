@@ -99,7 +99,7 @@ exports._fixTgl = async ({ that }) => {
 
 }
 exports.slashToStrip = tgl => moment(tgl, 'DD/MM/YYYY').format('YYYY-MM-DD')
-// exports.unixTime = () => moment().format('x')
+exports.unixTime = () => moment().format('x')
 // exports.getFormat1 = e => moment(e, 'D MMMM YYYY').format('YYYYMMDD')
 // exports.getFormat2 = e => moment(e, 'D MMMM YYYY').format('YYYY-MM-DD')
 // exports.checkDateA = ( a ) =>  a === moment().format('M/DD/YYYY')
