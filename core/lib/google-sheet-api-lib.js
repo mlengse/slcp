@@ -101,6 +101,16 @@ exports._fetchSheet = async ( {that, sheetName}) => {
           headersID = id
         }
         let objRow = {}
+        let judul
+        if(sheetName.toLowerCase().includes('konter')){
+          objRow.isKonter = true
+          judul = 'konter'
+        }
+        if(sheetName.toLowerCase().includes('konfirm')){
+          objRow.isKonfirm = true
+          judul = 'konfirm'
+        }
+        objRow[`${judul}_kelurahan`] = sheetName.toLowerCase().split('konter').join(' ').split('konfirm').join(' ').trim()
         if(id && headers && headersID !== id){
           // console.log(row[id][0])
           // if(row[id][0])
@@ -115,16 +125,19 @@ exports._fetchSheet = async ( {that, sheetName}) => {
               .trim()
               .split('  ').join(' ')
               .split(' ').join('_')
-              objRow[headersName] = col
+              if(headersName === 'nik' || headersName === 'jk' || headersName === 'usia' || headersName === 'umur' || headersName === 'nama' || headersName.includes('alamat')){
+                objRow[headersName] = col
+              } else {
+                objRow[`${judul}_${headersName}`] = col
+              }
             }
           })
-          objRow.kelurahan = sheetName.toLowerCase().split('konter').join(' ').split('konfirm').join(' ').trim()
           Object.keys(objRow).length > 2 ? rows[id] = objRow : null
         }
         // console.log(`${row[0]}, ${row[4]}`);
       })
       
-      let filteredRows = rows.filter(row => !Array.isArray(row));
+      let filteredRows = rows.filter(row => !Array.isArray(row) && row.nik && row.nik.length === 16);
       // rows.shift()
       that.spinner.succeed(`data found ${sheetName}: ${filteredRows.length}`)
       resolve(filteredRows)
@@ -152,16 +165,21 @@ exports._fetchKasus =  async ({ that }) => {
     return sheet.properties.title
   })
 
-  that.listConfirms = []
-  that.listKonters = []
+  that.people = {}
 
-  if(sheetsList.length) for(sheetName of sheetsList) {
-    if(sheetName.toLowerCase().includes('konfirm')){
-      that.listConfirms = [ ...that.listConfirms, ...(await that.fetchSheet({sheetName}))]
+  // that.listConfirms = []
+  // that.listKonters = []
+
+  if(sheetsList.length) for(sheetName of sheetsList) if(!sheetName.toLowerCase().includes('rekap')){
+    for ( let fetch of await that.fetchSheet({sheetName})) {
+      that.people[fetch.nik] = Object.assign({}, that.people[fetch.nik], fetch)
     }
-    if(sheetName.toLowerCase().includes('konter')){
-      that.listKonters = [ ...that.listKonters, ...(await that.fetchSheet({sheetName}))]
-    }
+    // if(sheetName.toLowerCase().includes('konfirm')){
+      // that.listConfirms = [ ...that.listConfirms, ...(await that.fetchSheet({sheetName}))]
+    // }
+    // if(sheetName.toLowerCase().includes('konter')){
+      // that.listKonters = [ ...that.listKonters, ...(await that.fetchSheet({sheetName}))]
+    // }
   }
 
 }

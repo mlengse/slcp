@@ -13,30 +13,30 @@ module.exports = async (isPM2) => {
 
     let num = 1
 
-    for( let konfirm of app.listConfirms ) {
-      app.spinner.succeed(`${num}: ${JSON.stringify(konfirm)}`)
-      await app.pushConfirm({ confirmData: konfirm })
+    // for( let konfirm of app.listConfirms ) {
+    //   app.spinner.succeed(`${num}: ${JSON.stringify(konfirm)}`)
+    //   await app.pushConfirm({ confirmData: konfirm })
 
-      let konters = app.listKonters.filter( konter => konter.nama_indeks_kasus === konfirm.no && konter.kelurahan === konfirm.kelurahan)
-      // if(konters.length > 0){
+    //   let konters = app.listKonters.filter( konter => konter.nama_indeks_kasus === konfirm.no && konter.kelurahan === konfirm.kelurahan)
+    //   // if(konters.length > 0){
 
-      //   app.spinner.succeed(`konter: ${konters.length}`)
+    //   //   app.spinner.succeed(`konter: ${konters.length}`)
 
-      //   let numk = 1
+    //   //   let numk = 1
 
-      //   for(let konter of konters) {
-      //     app.spinner.succeed(`${num}-${numk}: ${JSON.stringify(konter)}`)
-      //     konfirm = await app.pushKonter({ konterData: konter, confirmData: konfirm})
+    //   //   for(let konter of konters) {
+    //   //     app.spinner.succeed(`${num}-${numk}: ${JSON.stringify(konter)}`)
+    //   //     konfirm = await app.pushKonter({ konterData: konter, confirmData: konfirm})
   
-      //     numk++
+    //   //     numk++
 
-      //   }
+    //   //   }
 
-      //   num++
         
-      // }
+    //   // }
+    //   num++
   
-    }
+    // }
     
   
     // let tanggals = [ ...new Set(kontaks.map(({ Tanggal }) => Tanggal))]

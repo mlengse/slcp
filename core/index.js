@@ -32,9 +32,9 @@ module.exports = class Core {
   async init() {
     this.spinner.start('init apps')
     await this.fetchKasus()
-    await this.upsertData()
     await this.cleanData()
-    await this.fixTgl()
+    // await this.upsertData()
+    // await this.fixTgl()
 
   }
 }

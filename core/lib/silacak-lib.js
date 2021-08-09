@@ -22,91 +22,6 @@ exports._upsertData = async ({ that }) => {
   }
 }
 
-exports._cleanData = async ({ that }) => {
-  that.spinner.start(`cleanData`)
-
-  that.listConfirms = that.listConfirms.filter(confirm => confirm.nik && confirm.nik.length === 16 && that.filter14(confirm.tgl_onset)).map( confirm => {
-    that.spinner.start(`confirm.tgl_onset: ${confirm.tgl_onset}`)
-    if(!confirm.umur){
-      confirm.umur = that.umur(confirm.nik.substring(8, 12)).toString()
-    }
-    if(!confirm.jk){
-      confirm.jk = Number(confirm.nik[6]) > 3 ? 'P' : 'L'    
-    }
-    confirm.jk = confirm.jk.toLowerCase() === 'l' ? 'Laki' : 'Perempuan'
-
-    Object.keys(confirm).map( k => {
-      // if(k.includes('alamat') 
-        // || k.includes('jk') 
-        // || k.includes('umur') 
-      // ){
-        // delete confirm[k]
-      // }
-      if(k.includes('rujukan')){
-        confirm.tindakan = confirm[k]
-        delete confirm[k]
-      }
-      if(k.includes('gejala')){
-        confirm.gejala = confirm[k]
-        delete confirm[k]
-      }
-    })
-
-    // console.log(confirm)
-    
-    if(confirm.tindakan && (confirm.tindakan.toLowerCase().includes('sembuh') || confirm.tindakan.toLowerCase().includes('ninggal'))){
-      confirm.no_hp = '082226059060'
-    }
-
-    if(confirm.no_hp && confirm.no_hp[0] !== '0'){
-      confirm.no_hp = `0${confirm.no_hp}`
-    }
-    return confirm
-  })
-
-  that.listKonters = that.listKonters.filter( konter => konter.nik && konter.nik.length === 16 && Object.keys( konter ).filter( e => e.includes('nama_indeks')).length).map( konter => {
-    if(!konter.usia){
-      konter.usia = that.umur(konter.nik.substring(8, 12)).toString()
-    }
-    if(!konter.jk){
-      konter.jk = Number(konter.nik[6]) > 3 ? 'P' : 'L'    
-    }
-    konter.jk = konter.jk.toLowerCase() === 'l' ? 'Laki' : 'Perempuan'
-    if(konter.nama_indeks_kasus.toLowerCase().includes('no')){
-      let noIndeksKasus = konter.nama_indeks_kasus.toLowerCase().split('no')
-      noIndeksKasus = noIndeksKasus[noIndeksKasus.length-1]
-      if(noIndeksKasus.includes('.')){
-        noIndeksKasus = noIndeksKasus.split('.').join('')
-      }
-      noIndeksKasus = noIndeksKasus.trim()
-      konter.nama_indeks_kasus = noIndeksKasus
-    }
-    Object.keys(konter).map( k => {
-      // if(k.includes('alamat') 
-        // || k.includes('jk') 
-        // || k.includes('umur') 
-        // || k.includes('usia') 
-        // || k.includes('lahir') 
-      // ){
-        // delete konter[k]
-      // }
-    })
-
-    if(!konter.no_hp){
-      konter.no_hp = '082226059060'
-
-    }
-    if(konter.no_hp && konter.no_hp[0] !== '0'){
-      konter.no_hp = `0${konter.no_hp}`
-    }
-    return konter
-
-  }).filter( konter => Number(konter.nama_indeks_kasus) == konter.nama_indeks_kasus)
-
-
-}
-
-
 exports._cariConfirmByNIK = async ({ that, nik }) => {
   that.spinner.start(`cariConfirmByNIK`)
 
@@ -206,8 +121,9 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
 
   that.spinner.succeed(that.response)
 
-  if(that.response.includes(confirmData.nik) && that.response.toLowerCase().includes('belum')){
-    let nama = await that.getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
+  if(that.response.toLowerCase().includes('belum terdaftar')){
+    let nama = await that.page.evaluate(() => Document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
+    // getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
     if(!nama.length){
       await that.page.type('#CovidCaseProfileForm_GdwLfGObIRT', confirmData.nama)
       await that.page.type('#CovidCaseProfileForm_fk5drl1hTvc', confirmData.umur)
@@ -215,6 +131,8 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
       await that.page.type('#CovidCaseProfileForm_e25qAod3KTg', confirmData.alamat_domisili)
       let jkbtn = await that.page.$x(`//label[contains(., '${confirmData.jk}')]`)
       jkbtn[0] && await jkbtn[0].click()
+    } else {
+      that.spinner.start(`nama ${nama} sudah ditarik dari NIK`)
     }
     await that.page.type('#CovidCaseProfileForm_YlOp8W4FYRH', confirmData.no_hp)
     await that.clickSelanjutnya()
@@ -224,10 +142,10 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
       tgl: confirmData.tgl_onset
     })
       
-    await that.clickBtn({ text: 'Simpan'})
+    // await that.clickBtn({ text: 'Simpan'})
       
-    await that.page.waitForResponse(response=> response.status() === 200)
-    // await that.page.waitForTimeout(5000)
+    // await that.page.waitForResponse(response=> response.status() === 200)
+    await that.page.waitForTimeout(5000)
   } else {
     let existsAsKonter = await that.cariKonterByNIK({ nik: confirmData.nik})
   }
