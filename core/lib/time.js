@@ -1,5 +1,5 @@
 const moment = require('moment')
-moment.locale('id')
+// moment.locale('id')
 
 const getBaseDate = () => {
   let baseDate = moment().format('DD-MM-YYYY')

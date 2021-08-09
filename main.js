@@ -9,93 +9,35 @@ const app = new Core(config)
 module.exports = async (isPM2) => {
 
   try{
-    this.spinner.start('init apps')
-    await this.fetchKasus()
-    await this.cleanData()
-    // await this.upsertData()
+    app.spinner.start('init apps')
+    await app.fetchKasus()
+    await app.cleanData()
+    // await app.upsertData()
 
-    // for( let konfirm of app.listConfirms ) {
-    //   app.spinner.succeed(`${num}: ${JSON.stringify(konfirm)}`)
-    //   await app.pushConfirm({ confirmData: konfirm })
+    let num = 0
+    for(let nik of app.indeksKasus)
+    if(app.filter14(app.people[nik].konfirm_tgl_onset))
+    {
+      if(app.people[nik].isKonfirm && !app.people[nik].isKonter){
+        num++
+        // 1. push konfirm yg !konter
+        await app.pushConfirm({ confirmData: app.people[nik] })
 
-    //   let konters = app.listKonters.filter( konter => konter.nama_indeks_kasus === konfirm.no && konter.kelurahan === konfirm.kelurahan)
-    //   // if(konters.length > 0){
+      }
 
-    //   //   app.spinner.succeed(`konter: ${konters.length}`)
+      let namaIndeks
+      if(app.people[nik].isKonter){
+        namaIndeks = app.people[Object.keys(app.people).filter(iknik => app.people[nik].konter_kelurahan === app.people[iknik].konfirm_kelurahan && app.people[nik].konter_indeks === app.people[iknik].konfirm_no)[0]].nama
+        // 2. push konter dari konfirm (1)
+        // konfirm = await app.pushKonter({ konterData: konter, confirmData: konfirm})
 
-    //   //   let numk = 1
+        if(app.people[nik].isKonfirm){
+          // 3. push konter (2) yg jadi konfirm
 
-    //   //   for(let konter of konters) {
-    //   //     app.spinner.succeed(`${num}-${numk}: ${JSON.stringify(konter)}`)
-    //   //     konfirm = await app.pushKonter({ konterData: konter, confirmData: konfirm})
-  
-    //   //     numk++
-
-    //   //   }
-
-        
-    //   // }
-    //   num++
-  
-    // }
-    
-  
-    // let tanggals = [ ...new Set(kontaks.map(({ Tanggal }) => Tanggal))]
-    // let listDaft = []
-    // for( tanggal of tanggals){
-    //   let daft = (await app.getPendaftaranProvider({ 
-    //     tanggal: app.tglPcareFromKontak(tanggal)
-    //   }))
-
-    //   listDaft = [ ...listDaft, ...daft.map(({ peserta: {noKartu}}) => noKartu)]
-    // }
-    // // console.log(listDaft)
-    // // let listDaft = (await app.getPendaftaranProvider()).map(({ peserta: {noKartu}}) => noKartu)
-    // // listDaft = [ ...listDaft, ...(await app.getPendaftaranProvider({ tanggal: app.tglKemarin()})).map(({ peserta: {noKartu}}) => noKartu)]
-
-    // for (kontak of kontaks){
-    //   kontak = await app.upsertKontakJKN({ doc: kontak })
-    //   if( !listDaft.filter( e => e === kontak.No_JKN ).length ){
-    //     let peserta 
-    //     if(kontak.aktif || kontak.ketAktif){
-    //       peserta = kontak
-    //     } else {
-    //       let pstJKN = await app.getPesertaByNoka({
-    //         noka: kontak.No_JKN
-    //       })
-    //       kontak = Object.assign({}, kontak, pstJKN)
-    //       peserta = await app.upsertKontakJKN({ doc: kontak })
-    //     }
-
-    //     if(peserta && !peserta.daftResponse && peserta.aktif /* &&  peserta.kdProviderPst.kdProvider.trim() === app.config.PROVIDER*/ ){
-
-    //       // check if kontak not registered yet
-    //       let historyCheck = (await app.getRiwayatKunjungan({ peserta })).filter( ({ tglKunjungan }) => app.checkDate( tglKunjungan, kontak.Tanggal))
-
-    //       if(!historyCheck.length){
-  
-    //         let message = await app.sendToWS({kontak: peserta})
-
-    //         message = await app.upsertKontakJKN({ doc: message })
-
-    //         if(!message.from && message.daftResponse && JSON.stringify(message.daftResponse).includes('CREATED')) {
-
-    //           let textwa = await app.sendToWA({
-    //             message
-    //           })
-
-    //           message = await app.upsertKontakJKN({ doc: textwa })
-
-    //         }
-  
-    //         // console.log(message)
-    //       }
-    
-    //     }
-  
-    //   }
-
-    // }
+        }
+      }
+      app.spinner.succeed(`${num} ${app.people[nik].nama}${app.people[nik].isKonter ? ` konter ${namaIndeks} tgl_kontak ${app.people[nik].konter_tgl_kontak}` : ''}${app.people[nik].isKonfirm && app.people[nik].isKonter? ' =>' : ''}${app.people[nik].isKonfirm ? ` konfirm tgl_onset ${app.people[nik].konfirm_tgl_onset}` : ''}`)
+    }
 
     await app.close(isPM2)
 

@@ -102,7 +102,7 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
 
   await that.inputTgl({
     element: 'casenrollment_date',
-    tgl: confirmData.tgl_onset
+    tgl: confirmData.konfirm_tgl_onset
   })
   // await that.page.waitForTimeout(5000)
 
@@ -116,13 +116,20 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
     if (await that.isVisible({ el: periksa})){
       await periksa.click()
       await that.page.waitForResponse(response=> response.url().includes(confirmData.nik) && response.status() === 200)
+      for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
+        let notif = await that.page.evaluate( el => el.innerText, el)
+        if(notif && notif.length){
+          that.response = notif
+        }
+      }
+
     }
   }
 
   that.spinner.succeed(that.response)
 
   if(that.response.toLowerCase().includes('belum terdaftar')){
-    let nama = await that.page.evaluate(() => Document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
+    let nama = await that.page.evaluate(() => document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
     // getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
     if(!nama.length){
       await that.page.type('#CovidCaseProfileForm_GdwLfGObIRT', confirmData.nama)
@@ -134,20 +141,29 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
     } else {
       that.spinner.start(`nama ${nama} sudah ditarik dari NIK`)
     }
-    await that.page.type('#CovidCaseProfileForm_YlOp8W4FYRH', confirmData.no_hp)
+    await that.page.type('#CovidCaseProfileForm_YlOp8W4FYRH', confirmData.konfirm_no_hp)
+
+
     await that.clickSelanjutnya()
-    await that.page.waitForSelector('#ContactFactorForm_eventDate')
+
+    // await that.page.waitForSelector('#ContactFactorForm_eventDate')
+    let ada = await that.page.$('#ContactFactorForm_eventDate')
+    while(!ada){
+      await that.clickSelanjutnya()
+      await that.page.waitForTimeout(100)
+      ada = await that.page.$('#ContactFactorForm_eventDate')
+    }
     await that.inputTgl({
       element: 'ContactFactorForm_eventDate',
-      tgl: confirmData.tgl_onset
+      tgl: confirmData.konfirm_tgl_onset
     })
       
-    // await that.clickBtn({ text: 'Simpan'})
+    await that.clickBtn({ text: 'Simpan'})
       
-    // await that.page.waitForResponse(response=> response.status() === 200)
-    await that.page.waitForTimeout(5000)
+    await that.page.waitForResponse(response=> response.status() === 200)
+    // await that.page.waitForTimeout(5000)
   } else {
-    let existsAsKonter = await that.cariKonterByNIK({ nik: confirmData.nik})
+    // let existsAsKonter = await that.cariKonterByNIK({ nik: confirmData.nik})
   }
 
   // let nikFindResponses = await that.response.filter( resp => resp.url.includes(confirmData.nik))

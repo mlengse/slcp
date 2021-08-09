@@ -49,31 +49,36 @@ exports._isVisible = async ({ that, el }) => {
 
 exports._getPicker =  async ({ that }) => {
   that.spinner.start(`getPicker`)
-  let pickerElements = await that.page.$$('div.ant-picker-dropdown')
   let pickerElement
   while(!pickerElement){
-    for(let pick of [...pickerElements]){
+    await that.page.waitForTimeout(500)
+    let pickerElements = await that.page.$$('div.ant-picker-dropdown')
+    that.spinner.start(`pickerElements.length ${[...pickerElements].length}`)
+    for(let [id, pick] of Object.entries([...pickerElements])){
       let cl = await that.isVisible({ el: pick})
+      that.spinner.start(`pickerElement ${id} visibility: ${cl}`)
       if(cl){
         pickerElement = pick
+        return pickerElement
       }
     }
   
   }
 
-  return pickerElement
 
 }
 
 exports._inputTgl = async ({ that, element, tgl }) => {
   that.spinner.start(`element: ${element}, tgl: ${tgl}`)
   let blnThn = that.changeToSlcBlnThn(tgl)
+  that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn ${blnThn}`)
   await that.page.click(`#${element}`);
-  // await that.page.waitForTimeout(500)
+  await that.page.waitForTimeout(500)
   let slash = that.slashToStrip(tgl)
   let pickerElement = await that.getPicker()
   let blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
   let diff = that.getTglDiff(blnThnDef, blnThn)
+  that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
   let left = await pickerElement.$('button.ant-picker-header-prev-btn > span')
   while (diff < 0 && blnThn !== blnThnDef){
     pickerElement = await that.getPicker()
@@ -167,16 +172,16 @@ exports._initBrowser = async ({ that }) => {
     that.pages = await that.Browser.pages()
     that.page = that.pages[0]
     that.response = ''
-    that.page.on('response', async response => {
-      if(response.status() === 200 && response.request().resourceType()=== 'xhr' && response.url().includes('.json')){
-        for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
-          let notif = await that.page.evaluate( el => el.innerText, el)
-          if(notif && notif.length){
-            that.response = notif
-          }
-        }
-      }
-    })
+    // that.page.on('response', async response => {
+    //   if(response.status() === 200 && response.request().resourceType()=== 'xhr' && response.url().includes('.json')){
+    //     // for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
+    //     //   let notif = await that.page.evaluate( el => el.innerText, el)
+    //     //   if(notif && notif.length){
+    //     //     that.response = notif
+    //     //   }
+    //     // }
+    //   }
+    // })
     
     await that.page.goto(`${that.config.SILACAK_URL}`, waitOpt)
     

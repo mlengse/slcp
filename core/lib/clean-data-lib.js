@@ -36,10 +36,6 @@ exports._cleanData = async ({ that }) => {
 
     }
 
-    // that.listConfirms = that.listConfirms.filter(confirm => that.filter14(confirm.tgl_onset)).map( confirm => {
-    //   return confirm
-    // })
-
     if(person.isKonter){
       if(!person.umur){
         person.umur = that.umur(person.nik.substring(8, 12)).toString()
@@ -96,12 +92,7 @@ exports._cleanData = async ({ that }) => {
       }
     }
     that.people[nik] = Object.assign({}, that.people[nik], person)
-
-  // that.listKonters = that.listKonters.filter( konter => konter.nik && konter.nik.length === 16 && Object.keys( konter ).filter( e => e.includes('nama_indeks')).length).map( konter => {
-  // }).filter( konter => Number(konter.nama_indeks_kasus) == konter.nama_indeks_kasus)
   }
-
-
 
   //cari terkonfirmasi yg bukan konter
   that.indeksKasus = []
@@ -120,16 +111,12 @@ exports._cleanData = async ({ that }) => {
   //tambah konter masing2 indeks kasus
   let cp = [...that.indeksKasus]
   for(let iknik of cp){
-    let konters = Object.keys(that.people).filter( nik => that.people[nik].isKonter && that.people[nik].konter_indeks && that.people[nik].konter_indeks === that.people[iknik].konfirm_no)
+    let konters = Object.keys(that.people).filter( nik => that.people[nik].isKonter 
+      && that.people[nik].konter_indeks 
+      && that.people[nik].konter_indeks === that.people[iknik].konfirm_no 
+      && that.people[nik].konter_kelurahan === that.people[iknik].konfirm_kelurahan)
     konters.sort( (a,b) => that.sortDate(that.people[a].konter_tgl_kontak) - that.sortDate(that.people[b].konter_tgl_kontak))
     that.indeksKasus.splice(that.indeksKasus.indexOf(iknik)+1, 0, ...konters)
   }
 
-  let num = 0
-  that.indeksKasus.map((iknik) => {
-    if(that.people[iknik].isKonfirm && !that.people[iknik].isKonter){
-      num++
-    }
-    that.spinner.succeed(`${num} ${that.people[iknik].nama}${that.people[iknik].isKonter ? ` konter tgl_kontak ${that.people[iknik].konter_tgl_kontak}` : ''}${that.people[iknik].isKonfirm && that.people[iknik].isKonter? ' =>' : ''}${that.people[iknik].isKonfirm ? ` konfirm tgl_onset ${that.people[iknik].konfirm_tgl_onset}` : ''}`)
-  })
 }
