@@ -34,6 +34,16 @@ exports._cleanData = async ({ that }) => {
         person.konfirm_no_hp = `0${person.konfirm_no_hp}`
       }
 
+      if(!person.konfirm_no_hp){
+        person.konfirm_no_hp = '082226059060'
+      }
+
+      person.konfirm_tgl_wawancara = person.konfirm_tgl_onset
+
+      if(!that.filter14(person.konfirm_tgl_onset)){
+        person.konfirm_tgl_wawancara = that.kurang13()
+      }
+
     }
 
     if(person.isKonter){
@@ -83,14 +93,32 @@ exports._cleanData = async ({ that }) => {
         person.konter_indeks = noIndeksKasus
       }
 
+      if(person.konter_no_hp && person.konter_no_hp[0] !== '0'){
+        person.konter_no_hp = `0${person.konter_no_hp}`
+      }
+
+      if(!person.konter_no_hp && person.konfirm_no_hp){
+        person.konter_no_hp = person.konfirm_no_hp
+      }
+
       if(!person.konter_no_hp && !person.konfirm_no_hp){
         person.konter_no_hp = '082226059060'
       }
 
-      if(person.konter_no_hp && person.konter_no_hp[0] !== '0'){
-        person.konter_no_hp = `0${person.konter_no_hp}`
+      if(person.konter_tanggal_wawancara){
+        person.konter_tgl_wawancara = person.konter_tanggal_wawancara
+      } else {
+        person.konter_tgl_wawancara = person.konter_tgl_kontak
       }
+
+      if(!that.filter14(person.konter_tgl_wawancara)){
+        person.konter_tgl_wawancara = that.kurang13()
+      }
+
+
     }
+
+    person.nama = person.nama.split('.').join(' ').split(',').join(' ')
     that.people[nik] = Object.assign({}, that.people[nik], person)
   }
 

@@ -13,8 +13,8 @@ exports._findXPathAndClick = async ({ that, xpath }) => {
   that.spinner.start(`findXPathAndClick ${xpath}`)
   for(let el of await that.page.$x(xpath)){
     if(await that.isVisible({ el })){
-      await el.focus()
-      await el.click()
+      // await el.focus()
+      await el.evaluate( el => el.click())
     }
   }
 
@@ -48,7 +48,7 @@ exports._isVisible = async ({ that, el }) => {
 }
 
 exports._getPicker =  async ({ that }) => {
-  that.spinner.start(`getPicker`)
+  // that.spinner.start(`getPicker`)
   let pickerElement
   while(!pickerElement){
     await that.page.waitForTimeout(500)
@@ -56,7 +56,7 @@ exports._getPicker =  async ({ that }) => {
     that.spinner.start(`pickerElements.length ${[...pickerElements].length}`)
     for(let [id, pick] of Object.entries([...pickerElements])){
       let cl = await that.isVisible({ el: pick})
-      that.spinner.start(`pickerElement ${id} visibility: ${cl}`)
+      // that.spinner.start(`pickerElement ${id} visibility: ${cl}`)
       if(cl){
         pickerElement = pick
         return pickerElement
@@ -171,17 +171,6 @@ exports._initBrowser = async ({ that }) => {
     that.Browser = await pptr.launch(that.config.pptrOpt)
     that.pages = await that.Browser.pages()
     that.page = that.pages[0]
-    that.response = ''
-    // that.page.on('response', async response => {
-    //   if(response.status() === 200 && response.request().resourceType()=== 'xhr' && response.url().includes('.json')){
-    //     // for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
-    //     //   let notif = await that.page.evaluate( el => el.innerText, el)
-    //     //   if(notif && notif.length){
-    //     //     that.response = notif
-    //     //   }
-    //     // }
-    //   }
-    // })
     
     await that.page.goto(`${that.config.SILACAK_URL}`, waitOpt)
     

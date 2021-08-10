@@ -8,6 +8,7 @@ if(process.platform === 'win32' || CHROME_PATH ) {
   pptrOpt = {
     // headless: true,
     headless: false,
+    defaultViewport: null,
     executablePath: `${CHROME_PATH}`, 
     userDataDir: `${USER_DATA_PATH}`,
     args: [

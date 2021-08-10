@@ -1,10 +1,14 @@
 exports._pushConfirm = async ({ that, confirmData }) => {
   that.spinner.start(`pushConfirm`)
-  if(!confirmData.silacak) {
+  if(!confirmData.konfirm_silacak) {
     // push ke silacak
     await that.loginSilacak()
 
     let exists = await that.cariConfirmByNIK({ nik: confirmData.nik})
+
+    exists && await that.upsertPerson({person: Object.assign({}, confirmData, {
+      konfirm_silacak: true
+    })})
 
     if(!exists){
 
@@ -21,7 +25,8 @@ exports._pushConfirm = async ({ that, confirmData }) => {
 }
 
 exports._pushKonter = async ({ that, konterData, confirmData }) => {
-  if(!konterData.silacak) {
+  if(!konterData.konter_silacak) {
+    that.spinner.start(`pushKonter ${konterData.nik}`)
     await that.page.waitForTimeout(500);
 
     let isKonterInput = await that.page.$('#casenrollment_date')
@@ -30,6 +35,8 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
       await that.loginSilacak()
 
       await that.page.reload()
+
+      await that.cariConfirmByNIK({nik: confirmData.nik})
 
       let [row] = await that.page.$x(`//tr[contains(.,'${confirmData.nik}')]`)
       while(!row){
@@ -51,6 +58,18 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
 
       await that.gotoKonterTab()
 
+
+      //--------------------------------------------------------------
+
+      // warning: cari konter dulu di listnya konter dari konfirm
+
+
+
+
+
+
+      //==============================================================
+
       // let exists = await that.cariKonterByNIK({ nik: konterData.nik})
   
       // console.log(exists, konter)
@@ -65,9 +84,11 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
 
     that.spinner.start('siap input')
 
+    // console.log(konterData)
+
     await that.inputTgl({
       element: 'casenrollment_date',
-      tgl: konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus
+      tgl: konterData.konter_tgl_wawancara
     })
 
     // await that.page.waitForTimeout(5000)
@@ -81,10 +102,10 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
     await that.page.type('#CovidCaseProfileForm_mHwPpgxFDge', konterData.nik)
     await that.page.type('#CovidCaseProfileForm_GdwLfGObIRT', konterData.nama)
 
-    await that.page.type('#CovidCaseProfileForm_fk5drl1hTvc', konterData.usia)
-    await that.page.type('#CovidCaseProfileForm_quJD4An7Kmi', konterData.alamat_domisili)
-    await that.page.type('#CovidCaseProfileForm_e25qAod3KTg', konterData.alamat_domisili)
-    await that.page.type('#CovidCaseProfileForm_YlOp8W4FYRH', konterData.no_hp)
+    await that.page.type('#CovidCaseProfileForm_fk5drl1hTvc', konterData.umur)
+    await that.page.type('#CovidCaseProfileForm_quJD4An7Kmi', konterData.alamat_domisili || konterData.alamat)
+    await that.page.type('#CovidCaseProfileForm_e25qAod3KTg', konterData.alamat_domisili || konterData.alamat)
+    await that.page.type('#CovidCaseProfileForm_YlOp8W4FYRH', konterData.konter_no_hp)
 
 
     let jkbtn = await that.page.$x(`//label[contains(., '${konterData.jk}')]`)
@@ -98,14 +119,14 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
 
     await that.inputTgl({
       element: 'ContactFactorForm_eventDate',
-      tgl: konterData.tanggal_wawancara || konterData.tanggal_lapor || konterData.tanggal_kontak_dengan_indeks_kasus
+      tgl: konterData.konter_tgl_wawancara
     })
 
     // await that.page.click('#root > section > section > main > div')
 
     await that.inputTgl({
       element: 'ContactFactorForm_CcijMqQR3tM',
-      tgl: konterData.konter_tanggal_kontak_dengan_indeks_kasus
+      tgl: konterData.konter_tgl_kontak
     })
 
     // await that.page.click('#root > section > section > main > div')
@@ -124,22 +145,26 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
 
     await that.pilihOpsi({
       element: 'ContactFactorForm_iZ4G8QnSTqB',
-      pilihan: konterData.hubungan_dengan_indeks_kasus
+      pilihan: konterData.konter_hubungan_dengan_indeks_kasus
     })
 
     
     await that.pilihOpsi({
       element: 'ContactFactorForm_Y6Iseq8vUlU',
-      pilihan: konterData.kategori_kontak_erat
+      pilihan: konterData.konter_kategori_kontak_erat
     })
 
     await that.clickBtn({ text: 'Simpan'})
 
     await that.page.waitForResponse(response=> response.status() === 200)
 
+    await that.upsertPerson({ person: Object.assign({}, konterData, {
+      konter_silacak: true
+    })})
+
     // await that.page.waitForTimeout(500)
 
-    return confirmData
+    // return confirmData
 
   }
 }

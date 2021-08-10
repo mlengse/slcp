@@ -16,27 +16,36 @@ module.exports = async (isPM2) => {
 
     let num = 0
     for(let nik of app.indeksKasus)
-    if(app.filter14(app.people[nik].konfirm_tgl_onset))
+    // if(app.filter14(app.people[nik].konfirm_tgl_onset))
     {
-      if(app.people[nik].isKonfirm && !app.people[nik].isKonter){
+      let person = app.people[nik]
+
+      person = await app.upsertPerson({person})
+
+      if(person.isKonfirm && !person.isKonter && !person.konfirm_silacak){
         num++
         // 1. push konfirm yg !konter
-        await app.pushConfirm({ confirmData: app.people[nik] })
+        await app.pushConfirm({ confirmData: person })
 
       }
 
       let namaIndeks
-      if(app.people[nik].isKonter){
-        namaIndeks = app.people[Object.keys(app.people).filter(iknik => app.people[nik].konter_kelurahan === app.people[iknik].konfirm_kelurahan && app.people[nik].konter_indeks === app.people[iknik].konfirm_no)[0]].nama
+      if(person.isKonter){
+        let confirmData = app.people[Object.keys(app.people).filter(iknik => person.konter_kelurahan === app.people[iknik].konfirm_kelurahan && person.konter_indeks === app.people[iknik].konfirm_no)[0]]
+        namaIndeks = confirmData.nama
         // 2. push konter dari konfirm (1)
-        // konfirm = await app.pushKonter({ konterData: konter, confirmData: konfirm})
+        // konfirm = 
+        if(!person.konter_silacak){
+          await app.pushKonter({ konterData: person, confirmData})
+        }
 
-        if(app.people[nik].isKonfirm){
+        if(person.isKonfirm){
           // 3. push konter (2) yg jadi konfirm
 
         }
       }
-      app.spinner.succeed(`${num} ${app.people[nik].nama}${app.people[nik].isKonter ? ` konter ${namaIndeks} tgl_kontak ${app.people[nik].konter_tgl_kontak}` : ''}${app.people[nik].isKonfirm && app.people[nik].isKonter? ' =>' : ''}${app.people[nik].isKonfirm ? ` konfirm tgl_onset ${app.people[nik].konfirm_tgl_onset}` : ''}`)
+      app.spinner.succeed(`${num} ${person.nama}${person.isKonter ? ` konter ${namaIndeks} tgl_kontak ${person.konter_tgl_kontak}` : ''}${person.isKonfirm && person.isKonter? ' =>' : ''}${person.isKonfirm ? ` konfirm tgl_onset ${person.konfirm_tgl_onset}` : ''}`)
+      app.spinner.succeed(`---------------------------------------------------`)
     }
 
     await app.close(isPM2)

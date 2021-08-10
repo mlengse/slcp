@@ -22,6 +22,8 @@ exports._upsertData = async ({ that }) => {
   }
 }
 
+
+
 exports._cariConfirmByNIK = async ({ that, nik }) => {
   that.spinner.start(`cariConfirmByNIK`)
 
@@ -126,7 +128,7 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
     }
   }
 
-  that.spinner.succeed(that.response)
+  that.spinner.succeed(that.response.split(' ').map(e => e.trim()).join(' '))
 
   if(that.response.toLowerCase().includes('belum terdaftar')){
     let nama = await that.page.evaluate(() => document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
@@ -155,12 +157,16 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
     }
     await that.inputTgl({
       element: 'ContactFactorForm_eventDate',
-      tgl: confirmData.konfirm_tgl_onset
+      tgl: confirmData.konfirm_tgl_wawancara
     })
       
     await that.clickBtn({ text: 'Simpan'})
       
     await that.page.waitForResponse(response=> response.status() === 200)
+
+    await that.upsertPerson({ person: Object.assign({}, confirmData, {
+      konfirm_silacak: true
+    })})
     // await that.page.waitForTimeout(5000)
   } else {
     // let existsAsKonter = await that.cariKonterByNIK({ nik: confirmData.nik})
