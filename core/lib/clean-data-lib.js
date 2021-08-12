@@ -138,6 +138,9 @@ exports._cleanData = async ({ that }) => {
 
   //tambah konter masing2 indeks kasus
   let cp = [...that.indeksKasus]
+ // while(cp.length){
+// Cari konter masing2 konfirm, kmd array dikurangi, terus s.d. konter yg confirm habis.. kmd kurangi confirm yg bukan konter dan tdk punya konter
+  //}
   for(let iknik of cp){
     let konters = Object.keys(that.people).filter( nik => that.people[nik].isKonter 
       && that.people[nik].konter_indeks 
