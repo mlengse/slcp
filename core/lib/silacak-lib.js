@@ -127,7 +127,7 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
     }
   }
 
-  that.spinner.succeed(notif.split(' ').map(e => e.trim()).join(' '))
+  notif && that.spinner.succeed(notif.split(' ').map(e => e.trim()).join(' '))
 
   if(notif.toLowerCase().includes('belum terdaftar')){
     let nama = await that.page.evaluate(() => document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
