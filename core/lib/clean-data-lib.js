@@ -138,16 +138,36 @@ exports._cleanData = async ({ that }) => {
 
   //tambah konter masing2 indeks kasus
   let cp = [...that.indeksKasus]
- // while(cp.length){
-// Cari konter masing2 konfirm, kmd array dikurangi, terus s.d. konter yg confirm habis.. kmd kurangi confirm yg bukan konter dan tdk punya konter
-  //}
-  for(let iknik of cp){
+
+
+  // Cari konter masing2 konfirm, kmd array dikurangi, terus s.d. konter yg confirm habis.. kmd kurangi confirm yg bukan konter dan tdk punya konter
+  for(let iknik of Object.keys(that.people)){
+    let indeksKasus
+    if(that.people[iknik].isKonter){
+      indeksKasus = Object.keys(app.people)
+      .filter(ik => that.people[iknik].konter_kelurahan === that.people[ik].konfirm_kelurahan 
+        && that.people[iknik].konter_indeks === that.people[ik].konfirm_no)[0]
+
+    }
     let konters = Object.keys(that.people).filter( nik => that.people[nik].isKonter 
       && that.people[nik].konter_indeks 
       && that.people[nik].konter_indeks === that.people[iknik].konfirm_no 
       && that.people[nik].konter_kelurahan === that.people[iknik].konfirm_kelurahan)
     konters.sort( (a,b) => that.sortDate(that.people[a].konter_tgl_kontak) - that.sortDate(that.people[b].konter_tgl_kontak))
-    that.indeksKasus.splice(that.indeksKasus.indexOf(iknik)+1, 0, ...konters)
+    let hasKonter = !!konters.length
+    that.people[iknik] = Object.assign({}, that.people[iknik], {
+      hasKonter,
+      konters,
+      indeksKasus
+    })
+
+    hasKonter && that.indeksKasus.indexOf(iknik) < 0 && that.indeksKasus.push(iknik)
+    hasKonter && that.indeksKasus.splice(that.indeksKasus.indexOf(iknik)+1, 0, ...konters)
   }
+
+  that.indeksKasus = that.indeksKasus.filter( nik => !(that.people[nik].isKonfirm
+    && !that.people[nik].isKonter
+    && !that.people[nik].hasKonter
+    ))
 
 }

@@ -22,24 +22,27 @@ module.exports = async (isPM2) => {
 
       person = await app.upsertPerson({person})
 
-      if(person.isKonfirm && !person.isKonter && !person.konfirm_silacak){
-        // num++
-        // 1. push konfirm yg !konter
-        await app.pushConfirm({ confirmData: person })
-
-      }
       if(person.isKonfirm && !person.isKonter){
         num++
+        if(!person.konfirm_silacak){
+          // 1. push konfirm yg !konter
+          await app.pushConfirm({ confirmData: person })
+        }
       }
 
       let namaIndeks
       if(person.isKonter){
-        let confirmData = app.people[Object.keys(app.people).filter(iknik => person.konter_kelurahan === app.people[iknik].konfirm_kelurahan && person.konter_indeks === app.people[iknik].konfirm_no)[0]]
+        let confirmData = app.people[Object.keys(app.people)
+          .filter(iknik => person.konter_kelurahan === app.people[iknik].konfirm_kelurahan 
+            && person.konter_indeks === app.people[iknik].konfirm_no)[0]]
         namaIndeks = confirmData.nama
         // 2. push konter dari konfirm (1)
         // konfirm = 
         if(!person.konter_silacak){
-          await app.pushKonter({ konterData: person, confirmData})
+          await app.pushKonter({ 
+            konterData: person, 
+            confirmData
+          })
         }
 
         if(person.isKonfirm){
