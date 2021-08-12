@@ -7,6 +7,7 @@ let pptrOpt = {}
 if(process.platform === 'win32' || CHROME_PATH ) {
   pptrOpt = {
     // headless: true,
+    devtools: true,
     headless: false,
     defaultViewport: null,
     executablePath: `${CHROME_PATH}`, 

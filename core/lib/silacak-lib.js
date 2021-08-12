@@ -114,23 +114,22 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
 
   await that.page.type('#CovidCaseProfileForm_mHwPpgxFDge', confirmData.nik)
 
+  let notif
+
   for (let periksa of await that.page.$x(`//button[contains(.,'Periksa')]`)){
     if (await that.isVisible({ el: periksa})){
       await periksa.click()
       await that.page.waitForResponse(response=> response.url().includes(confirmData.nik) && response.status() === 200)
       for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
-        let notif = await that.page.evaluate( el => el.innerText, el)
-        if(notif && notif.length){
-          that.response = notif
-        }
+        notif = await that.page.evaluate( el => el.innerText, el)
       }
 
     }
   }
 
-  that.spinner.succeed(that.response.split(' ').map(e => e.trim()).join(' '))
+  that.spinner.succeed(notif.split(' ').map(e => e.trim()).join(' '))
 
-  if(that.response.toLowerCase().includes('belum terdaftar')){
+  if(notif.toLowerCase().includes('belum terdaftar')){
     let nama = await that.page.evaluate(() => document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
     // getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
     if(!nama.length){
@@ -161,6 +160,8 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
     })
       
     await that.clickBtn({ text: 'Simpan'})
+
+    await that.page.waitForTimeout('5000')
       
     await that.page.waitForResponse(response=> response.status() === 200)
 

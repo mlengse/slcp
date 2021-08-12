@@ -11,11 +11,16 @@ exports._getInnerText = async({ that, el}) => await that.page.evaluate( el => el
 
 exports._findXPathAndClick = async ({ that, xpath }) => {
   that.spinner.start(`findXPathAndClick ${xpath}`)
-  for(let el of await that.page.$x(xpath)){
-    if(await that.isVisible({ el })){
-      // await el.focus()
-      await el.evaluate( el => el.click())
+  let visible = false
+  while(!visible){
+    for(let el of await that.page.$x(xpath)){
+      visible = await that.isVisible({ el })
+      if(visible){
+        // await el.focus()
+        await el.evaluate( el => el.click())
+      }
     }
+  
   }
 
 }

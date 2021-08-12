@@ -57,31 +57,31 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
 
       await that.gotoKonterTab()
 
-      let btnTambahKonter = await that.page.evaluate(() => [...document.querySelectorAll('button.ant-btn-primary')].filter( e => e.innerText.toLowerCase().includes(`tambah kontak erat baru`)))
+      let btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText && e.innerText.toLowerCase().includes(`tambah kontak erat baru` ).length))
 
-      while(!btnTambahKonter.length){
-        btnTambahKonter = await that.page.evaluate(() => [...document.querySelectorAll('button.ant-btn-primary')].filter( e => e.innerText.toLowerCase().includes(`tambah kontak erat baru`)))
+      while(!btnTambahKonter){
+        btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText && e.innerText.toLowerCase().includes(`tambah kontak erat baru` ).length))
       }
 
       let exists = false
+      
+      // await that.page.waitForResponse(response=> response.url().includes(`Gf4Ojyk54rO`) && response.status() === 200)
+      await that.page.waitForTimeout(500);
 
-      let noKonter = await that.page.evaluate(() => [...document.querySelectorAll('div.ant-empty')].filter(e => e.innerText.toLowerCase().includes('tidak ada kontak erat')))
-
-      if(!noKonter.length){
+      let noKonter = await that.page.$$eval('div.ant-empty', els => els && els.length && [...els].filter( e => e.innerText && e.innerText.toLowerCase().includes('tidak ada kontak erat').length))
+      if(!noKonter){
         //--------------------------------------------------------------
 
         // warning: cari konter dulu di listnya konter dari konfirm
-
-
-        await that.page.waitForResponse(response=> response.url().includes(`Gf4Ojyk54rO`) && response.status() === 200)
 
         // console.log(JSON.stringify(that.response[that.response.length-1].json))
         let [table] = await that.page.$x("//table[contains(., 'Nama')]")
         while(!table){
           ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
         }
+        console.log(konterData.nik)
         exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, konterData.nik)
-        that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${nik}, exists: ${exists}`)
+        that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${konterData.nik}, exists: ${exists}`)
 
 
         //==============================================================
