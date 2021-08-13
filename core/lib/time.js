@@ -14,7 +14,8 @@ exports.tambah1 = tgl => moment(tgl, 'DD/MM/YYYY').add(1, 'days').format('DD/MM/
 exports.kurang1 = tgl => moment(tgl, 'DD/MM/YYYY').add(-1, 'days').format('DD/MM/YYYY')
 exports.kurang13 = () => moment().add(-13, 'days').format('DD/MM/YYYY')
 exports.filter14 = tgl => moment().diff(moment(tgl, 'DD/MM/YYYY'), 'days', false) < 14
-exports.getTglDiff = (tgl, tglDef) => moment(tglDef, 'MMMYYYY').diff(moment(tgl, 'MMMYYYY'), 'months', false)
+exports.getTglDiff = (tgl, tglDef) => 1+moment(tglDef, 'MMMYYYY').diff(moment(tgl, 'MMMYYYY'), 'months', false)
+exports.getSelisihHari = (first, next) => moment(next, 'DD/MM/YYYY').diff(moment(first, 'DD/MM/YYYY'), 'days', false)
 exports.umur = tgl => moment().diff(moment(tgl, 'MMYY'), 'years', false)
 exports.bln = tgl => moment().format('MMM')
 exports.changeToSlcBlnThn = tgl => moment(tgl, 'DD/MM/YYYY').format('MMMYYYY')

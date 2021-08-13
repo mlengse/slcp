@@ -18,9 +18,8 @@ module.exports = async (isPM2) => {
     for(let nik of app.indeksKasus)
     // if(app.filter14(app.people[nik].konfirm_tgl_onset))
     {
-      let person = app.people[nik]
 
-      person = await app.upsertPerson({person})
+      let person = await app.upsertPerson({person: app.people[nik]})
 
       if(person.isKonfirm && !person.isKonter){
         num++

@@ -26,7 +26,7 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
 
   await that.gotoKonterTab()
 
-  that.spinner.succeed(`${JSON.stringify(person)}`)
+  // that.spinner.succeed(`${JSON.stringify(person)}`)
 
   let btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText 
     && e.innerText.toLowerCase().includes(`tambah kontak erat baru` )).length)
@@ -61,11 +61,11 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
         let td = await tr.$('td.ant-table-cell > a')
         if(td){
           let nama = await td.evaluate( a => a.innerText)
-          console.log(nama)
+          that.spinner.succeed(`${nama} tgl entry ${person.konter_tgl_entry} terkonfirmasi setelah karantina hari ke-${person.selisihEntryOnset} di tgl ${person.konfirm_tgl_onset}`)
         }
       }
     }
-    that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${person.nik}, exists: ${exists}`)
+    // that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${person.nik}, exists: ${exists}`)
 
 
     //==============================================================

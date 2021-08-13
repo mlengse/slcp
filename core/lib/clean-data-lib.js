@@ -119,6 +119,13 @@ exports._cleanData = async ({ that }) => {
     }
 
     person.nama = person.nama.split('.').join(' ').split(',').join(' ')
+    if(person.isKonter && person.isKonfirm) {
+      person.selisihEntryOnset = that.getSelisihHari(person.konter_tgl_entry, person.konfirm_tgl_onset)
+      if(person.selisihEntryOnset < 1 ){
+        person.selisihEntryOnset = 1
+      }
+    }
+
     that.people[nik] = Object.assign({}, that.people[nik], person)
   }
 
