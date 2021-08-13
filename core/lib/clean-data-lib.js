@@ -144,7 +144,7 @@ exports._cleanData = async ({ that }) => {
   for(let iknik of Object.keys(that.people)){
     let indeksKasus
     if(that.people[iknik].isKonter){
-      indeksKasus = Object.keys(app.people)
+      indeksKasus = Object.keys(that.people)
       .filter(ik => that.people[iknik].konter_kelurahan === that.people[ik].konfirm_kelurahan 
         && that.people[iknik].konter_indeks === that.people[ik].konfirm_no)[0]
 

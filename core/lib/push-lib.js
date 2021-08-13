@@ -25,7 +25,7 @@ exports._pushConfirm = async ({ that, confirmData }) => {
 }
 
 exports._pushKonter = async ({ that, konterData, confirmData }) => {
-  if(!konterData.konter_silacak) {
+  // if(!konterData.konter_silacak) {
     that.spinner.start(`pushKonter ${konterData.nik}`)
     // await that.page.waitForTimeout(500);
 
@@ -57,10 +57,12 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
 
       await that.gotoKonterTab()
 
-      let btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText && e.innerText.toLowerCase().includes(`tambah kontak erat baru` ).length))
+      let btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText 
+        && e.innerText.toLowerCase().includes(`tambah kontak erat baru` )).length)
 
       while(!btnTambahKonter){
-        btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText && e.innerText.toLowerCase().includes(`tambah kontak erat baru` ).length))
+        btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText 
+          && e.innerText.toLowerCase().includes(`tambah kontak erat baru` )).length)
       }
 
       let exists = false
@@ -68,7 +70,8 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
       // await that.page.waitForResponse(response=> response.url().includes(`Gf4Ojyk54rO`) && response.status() === 200)
       await that.page.waitForTimeout(500);
 
-      let noKonter = await that.page.$$eval('div.ant-empty', els => els && els.length && [...els].filter( e => e.innerText && e.innerText.toLowerCase().includes('tidak ada kontak erat').length))
+      let noKonter = await that.page.$$eval('div.ant-empty', els => els && els.length && [...els].filter( e => e.innerText 
+        && e.innerText.toLowerCase().includes('tidak ada kontak erat')).length)
       if(!noKonter){
         //--------------------------------------------------------------
 
@@ -79,7 +82,7 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
         while(!table){
           ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
         }
-        console.log(konterData.nik)
+        // console.log(konterData.nik)
         exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, konterData.nik)
         that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${konterData.nik}, exists: ${exists}`)
 
@@ -103,6 +106,6 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
 
     // return confirmData
 
-  }
+  // }
 }
 

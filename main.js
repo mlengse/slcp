@@ -37,16 +37,16 @@ module.exports = async (isPM2) => {
             && person.konter_indeks === app.people[iknik].konfirm_no)[0]]
         namaIndeks = confirmData.nama
         // 2. push konter dari konfirm (1)
-        // konfirm = 
-        if(!person.konter_silacak){
+        // if(!person.konter_silacak){
           await app.pushKonter({ 
             konterData: person, 
             confirmData
           })
-        }
+        // }
 
         if(person.isKonfirm){
           // 3. push konter (2) yg jadi konfirm
+          await app.convertKonterToKonfirm({ person, indeksKasus: confirmData })
 
         }
       }

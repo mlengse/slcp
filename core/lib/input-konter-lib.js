@@ -40,7 +40,7 @@ exports._inputKonter = async ({ that, konterData }) => {
   notif && that.spinner.succeed(notif.split(' ').map(e => e.trim()).join(' '))
 
   if(notif.toLowerCase().includes('belum terdaftar')){
-    await that.page.waitForTimeout(500)
+    await that.page.waitForTimeout(2000)
     let nama = await that.page.evaluate(() => document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
     // getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
     if(!nama.length){
