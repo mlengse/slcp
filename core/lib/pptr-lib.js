@@ -79,13 +79,17 @@ exports._waitFor = async({ that, selector}) => {
     await that.page.waitForTimeout(100)
     el = await that.page.$(selector)
   }
+
+  // that.spinner.succeed(`${selector} found`)
 }
 
 exports._inputTgl = async ({ that, element, tgl }) => {
   that.spinner.start(`element: ${element}, tgl: ${tgl}`)
   let blnThn = that.changeToSlcBlnThn(tgl)
   that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn ${blnThn}`)
-  await that.page.click(`#${element}`);
+  await that.waitFor({ selector: `input#${element}`})
+  // await that.page.waitForTimeout(500)
+  await that.page.click(`input#${element}`);
   await that.page.waitForTimeout(500)
   let slash = that.slashToStrip(tgl)
   let pickerElement = await that.getPicker()

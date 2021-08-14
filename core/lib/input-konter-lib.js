@@ -37,7 +37,7 @@ exports._inputKonter = async ({ that, konterData }) => {
     }
   }
 
-  notif && that.spinner.succeed(notif.split(' ').map(e => e.trim()).join(' '))
+  notif && that.spinner.succeed(notif.split('\n').map(e => e.trim()).join(' '))
 
   if(notif && notif.toLowerCase().includes('belum terdaftar')){
     await that.page.waitForTimeout(2000)

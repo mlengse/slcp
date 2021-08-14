@@ -25,13 +25,13 @@ exports._upsertData = async ({ that }) => {
 
 
 exports._cariConfirmByNIK = async ({ that, nik }) => {
-  that.spinner.start(`cariConfirmByNIK`)
+  that.spinner.start(`cariConfirmByNIK ${nik}`)
 
   let inputNIK = await that.page.$('input#nik')
 
   while(!inputNIK){
     await that.page.reload()
-    await that.page.waitForTimeout(500)
+    // await that.page.waitForTimeout(500)
     inputNIK = await that.page.$('input#nik')
 
     // await that.page.waitForSelector('input#nik')
@@ -43,6 +43,7 @@ exports._cariConfirmByNIK = async ({ that, nik }) => {
     await hapus.click();
   }
 
+  that.spinner.start(`cariConfirmByNIK nik: ${nik}`)
   // await that.page.type('input#nik', '3372026504730002')
   await that.page.type('input#nik', nik)
 
@@ -59,12 +60,12 @@ exports._cariConfirmByNIK = async ({ that, nik }) => {
   }
   await that.page.waitForTimeout(500)
   let exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
-  that.spinner.succeed(`cariConfirmByNIK nik: ${nik}, exists: ${exists}`)
+  // that.spinner.succeed(`cariConfirmByNIK nik: ${nik}, exists: ${exists}`)
   return exists
 }
 
 exports._cariKonterByNIK = async ({ that, nik }) => {
-  that.spinner.start(`cariKonterByNIK`)
+  that.spinner.start(`cariKonterByNIK ${nik}`)
 
   await that.page.waitForTimeout(1000)
 
@@ -91,7 +92,8 @@ exports._cariKonterByNIK = async ({ that, nik }) => {
   }
   let exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
   // console.log(confirmData.nik, exists)
-  that.spinner.succeed(`cariKonterByNIK ${nik} exists: ${exists}`)
+
+  // that.spinner.succeed(`cariKonterByNIK ${nik} exists: ${exists}`)
 
   return exists
 
@@ -129,7 +131,7 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
     }
   }
 
-  notif && that.spinner.succeed(notif.split(' ').map(e => e.trim()).join(' '))
+  notif && that.spinner.succeed(notif.split('\n').map(e => e.trim()).join(' '))
 
   if(notif && notif.toLowerCase().includes('belum terdaftar')){
     await that.page.waitForTimeout(2000)
