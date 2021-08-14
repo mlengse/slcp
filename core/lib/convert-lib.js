@@ -61,7 +61,19 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
         let td = await tr.$('td.ant-table-cell > a')
         if(td){
           let nama = await td.evaluate( a => a.innerText)
-          that.spinner.succeed(`${nama} tgl entry ${person.konter_tgl_entry} terkonfirmasi setelah karantina hari ke-${person.selisihEntryOnset} di tgl ${person.konfirm_tgl_onset}`)
+          if(nama){
+            let [row] = await that.page.$x(`//tr[contains(.,'${nama}')]`)
+            if(row){
+              let hari = await row.$(`td.ant-table-cell[style="text-align: center;"]:nth-child(${1+Number(person.selisihEntryOnset)})`)
+              if(hari){
+                that.spinner.succeed(`${nama} tgl entry ${person.konter_tgl_entry} terkonfirmasi setelah karantina hari ke-${person.selisihEntryOnset} di tgl ${person.konfirm_tgl_onset}`)
+                await hari.evaluate( e => e.click())
+                await that.page.waitForTimeout(5000)
+                console.log('sudah klik')
+              }
+            }
+
+          }
         }
       }
     }

@@ -33,7 +33,7 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
     // while(!isKonterInput){
       await that.loginSilacak()
 
-      await that.page.reload()
+      // await that.page.reload()
 
       await that.cariConfirmByNIK({nik: confirmData.nik})
 
