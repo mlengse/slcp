@@ -90,26 +90,29 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
         if(td){
           let nama = await td.evaluate( a => a.innerText)
           // console.log(nama)
-          if(nama){
-            let rows = await that.page.$x(`//tr[contains(.,'${nama}')]`)
-            if(rows.length) for (let row of rows) {
-              // console.log(row[0])
-              let hari = await row.$(`td.ant-table-cell[style="text-align: center;"]:nth-child(${1+Number(person.selisihEntryOnset)})`)
-              // console.log(!!hari)
-              if(hari){
-                let sudah = await hari.$('span.anticon.anticon-plus-circle')
-                if(!sudah){
-                  that.spinner.succeed(`${nama} tgl entry ${person.konter_tgl_entry} terkonfirmasi setelah karantina hari ke-${person.selisihEntryOnset} di tgl ${person.konfirm_tgl_onset}`)
-                  await hari.evaluate( e => e.click())
-                  await that.inputConvert({ person })
-                  // console.log('sudah klik')
-  
-                }
+          while(!nama){
+            await that.page.waitForTimeout(500);
+            nama = await td.evaluate( a => a.innerText)
+          }
+          
+          let rows = await that.page.$x(`//tr[contains(.,'${nama}')]`)
+          if(rows.length) for (let row of rows) {
+            // console.log(row[0])
+            let hari = await row.$(`td.ant-table-cell[style="text-align: center;"]:nth-child(${1+Number(person.selisihEntryOnset)})`)
+            // console.log(!!hari)
+            if(hari){
+              let sudah = await hari.$('span.anticon.anticon-plus-circle')
+              if(!sudah){
+                that.spinner.succeed(`${nama} tgl entry ${person.konter_tgl_entry} terkonfirmasi setelah karantina hari ke-${person.selisihEntryOnset} di tgl ${person.konfirm_tgl_onset}`)
+                await hari.evaluate( e => e.click())
+                await that.inputConvert({ person })
+                // console.log('sudah klik')
+
               }
-
-              person.konfirm_silacak = true
-
             }
+
+            person.konfirm_silacak = true
+
           }
         }
       }
