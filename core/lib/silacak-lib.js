@@ -54,8 +54,10 @@ exports._cariConfirmByNIK = async ({ that, nik }) => {
   // console.log(JSON.stringify(that.response[that.response.length-1].json))
   let [table] = await that.page.$x("//table[contains(., 'Nama')]")
   while(!table){
+    await that.page.waitForTimeout(500)
     ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
   }
+  await that.page.waitForTimeout(500)
   let exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
   that.spinner.succeed(`cariConfirmByNIK nik: ${nik}, exists: ${exists}`)
   return exists
