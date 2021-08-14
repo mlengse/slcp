@@ -36,21 +36,23 @@ module.exports = async (isPM2) => {
             && person.konter_indeks === app.people[iknik].konfirm_no)[0]]
         namaIndeks = confirmData.nama
         // 2. push konter dari konfirm (1)
-        // if(!person.konter_silacak){
+        if(!person.konter_silacak){
           await app.pushKonter({ 
             konterData: person, 
             confirmData
           })
-        // }
+        }
 
         if(person.isKonfirm){
           // 3. push konter (2) yg jadi konfirm
-          await app.convertKonterToKonfirm({ person, indeksKasus: confirmData })
-
+          if(!person.konfirm_silacak){
+            await app.convertKonterToKonfirm({ person, indeksKasus: confirmData })
+          }
         }
       }
       app.spinner.succeed(`${num} ${person.nama}${person.isKonter ? ` konter ${namaIndeks} tgl_kontak ${person.konter_tgl_kontak}` : ''}${person.isKonfirm && person.isKonter? ' =>' : ''}${person.isKonfirm ? ` konfirm tgl_onset ${person.konfirm_tgl_onset}` : ''}`)
       app.spinner.succeed(`---------------------------------------------------`)
+      await app.upsertPerson({person})
     }
 
     await app.close(isPM2)

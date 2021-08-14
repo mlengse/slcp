@@ -129,19 +129,20 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
 
   notif && that.spinner.succeed(notif.split(' ').map(e => e.trim()).join(' '))
 
-  if(notif.toLowerCase().includes('belum terdaftar')){
+  if(notif && notif.toLowerCase().includes('belum terdaftar')){
+    await that.page.waitForTimeout(2000)
     let nama = await that.page.evaluate(() => document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
     // getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
     if(!nama.length){
       await that.page.type('#CovidCaseProfileForm_GdwLfGObIRT', confirmData.nama)
       await that.page.type('#CovidCaseProfileForm_fk5drl1hTvc', confirmData.umur)
       await that.page.type('#CovidCaseProfileForm_quJD4An7Kmi', confirmData.alamat_sesuai_identitas)
-      await that.page.type('#CovidCaseProfileForm_e25qAod3KTg', confirmData.alamat_domisili)
       let jkbtn = await that.page.$x(`//label[contains(., '${confirmData.jk}')]`)
       jkbtn[0] && await jkbtn[0].click()
     } else {
       that.spinner.start(`nama ${nama} sudah ditarik dari NIK`)
     }
+    await that.page.type('#CovidCaseProfileForm_e25qAod3KTg', confirmData.alamat_domisili)
     await that.page.type('#CovidCaseProfileForm_YlOp8W4FYRH', confirmData.konfirm_no_hp)
 
 

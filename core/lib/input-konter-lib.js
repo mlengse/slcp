@@ -39,7 +39,7 @@ exports._inputKonter = async ({ that, konterData }) => {
 
   notif && that.spinner.succeed(notif.split(' ').map(e => e.trim()).join(' '))
 
-  if(notif.toLowerCase().includes('belum terdaftar')){
+  if(notif && notif.toLowerCase().includes('belum terdaftar')){
     await that.page.waitForTimeout(2000)
     let nama = await that.page.evaluate(() => document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
     // getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
@@ -75,6 +75,17 @@ exports._inputKonter = async ({ that, konterData }) => {
       tgl: konterData.konter_tgl_kontak
     })
   
+    await that.pilihOpsi({
+      element: 'ContactFactorForm_iZ4G8QnSTqB',
+      pilihan: konterData.konter_hubungan_dengan_indeks_kasus
+    })
+  
+    
+    await that.pilihOpsi({
+      element: 'ContactFactorForm_Y6Iseq8vUlU',
+      pilihan: konterData.konter_kategori_kontak_erat
+    })
+  
     // await that.page.click('#root > section > section > main > div')
   
     await that.inputTgl({
@@ -87,17 +98,6 @@ exports._inputKonter = async ({ that, konterData }) => {
     await that.inputTgl({
       element: 'ContactFactorForm_eventExitReqDate',
       tgl: konterData.konter_tgl_exit
-    })
-  
-    await that.pilihOpsi({
-      element: 'ContactFactorForm_iZ4G8QnSTqB',
-      pilihan: konterData.konter_hubungan_dengan_indeks_kasus
-    })
-  
-    
-    await that.pilihOpsi({
-      element: 'ContactFactorForm_Y6Iseq8vUlU',
-      pilihan: konterData.konter_kategori_kontak_erat
     })
   
     await that.clickBtn({ text: 'Simpan'})

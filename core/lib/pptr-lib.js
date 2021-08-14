@@ -85,23 +85,25 @@ exports._inputTgl = async ({ that, element, tgl }) => {
   let diff = that.getTglDiff(blnThnDef, blnThn)
   that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
   let left = await pickerElement.$('button.ant-picker-header-prev-btn > span')
-  while (diff < 0 && blnThn !== blnThnDef){
+  while (diff !== 0 && blnThn !== blnThnDef){
     pickerElement = await that.getPicker()
     blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
     diff = that.getTglDiff(blnThnDef, blnThn)
-    left = await pickerElement.$('button.ant-picker-header-prev-btn > span')
-    await left.click()
-    await that.page.waitForTimeout(500)
-    blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
-    diff = that.getTglDiff(blnThnDef, blnThn)
-    that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
+    left = await pickerElement.$('button.ant-picker-header-prev-btn > span.ant-picker-prev-icon')
+    if(left){
+      await left.click()
+      await that.page.waitForTimeout(500)
+      blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
+      diff = that.getTglDiff(blnThnDef, blnThn)
+      that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
+    }
   }
   // await that.page.waitForTimeout(500)
   let td, tgll
   let num = 0
   while(!td){
     let tds = await that.page.$x(`//td[contains(@title, '${slash}')]`)
-    for(let tt of tds){
+    if(tds.length) for(let tt of tds){
       let tdVis = await that.isVisible({ el: tt })
       if(tdVis){
         td = tt
@@ -109,15 +111,15 @@ exports._inputTgl = async ({ that, element, tgl }) => {
       }
       that.spinner.start(`tdVis: ${tdVis}, tgll: ${tgll}, slash: ${slash}`)
     }
-    // await that.page.waitForTimeout(500)
     if(num%20 === 0){
       tgl = that.kurang1(tgl)
       slash = that.slashToStrip(tgl)
     }
+    await that.page.waitForTimeout(500)
     num++
   }
   await td.click()
-  // await that.page.waitForTimeout(500)
+  await that.page.waitForTimeout(500)
 }
 
 exports._pilihOpsi = async ({ that, element, pilihan }) => {
