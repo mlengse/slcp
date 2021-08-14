@@ -1,5 +1,5 @@
 exports._inputConvert =  async ({ that, person }) => {
-  await that.page.waitForSelector('#FollowUpForm_eventDate')
+  await that.waitFor({selector: '#FollowUpForm_eventDate'})
   
   await that.inputTgl({
     element: 'FollowUpForm_eventDate',
@@ -8,7 +8,7 @@ exports._inputConvert =  async ({ that, person }) => {
 
   await that.findXPathAndClick({ xpath: '//span[contains(.,"Ya")]'})
 
-  await that.page.waitForSelector('#FollowUpForm_tesDate')
+  await that.waitFor({selector:'#FollowUpForm_tesDate'})
   
   await that.inputTgl({
     element: 'FollowUpForm_tesDate',

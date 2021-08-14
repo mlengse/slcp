@@ -1,7 +1,7 @@
 exports._inputKonter = async ({ that, konterData }) => {
   await that.clickBtn({ text: 'Tambah'})
   
-  await that.page.waitForSelector('#casenrollment_date')
+  await that.waitFor({selector:'#casenrollment_date'})
 
   // isKonterInput = await that.page.$('#casenrollment_date')
 
@@ -20,7 +20,7 @@ exports._inputKonter = async ({ that, konterData }) => {
 
   //---------------------------------------------------------------------------------
 
-  await that.page.waitForSelector('#CovidCaseProfileForm_mHwPpgxFDge')
+  await that.waitFor({selector:'#CovidCaseProfileForm_mHwPpgxFDge'})
 
   await that.page.type('#CovidCaseProfileForm_mHwPpgxFDge', konterData.nik)
 
@@ -61,7 +61,7 @@ exports._inputKonter = async ({ that, konterData }) => {
   
     //----------------------------------------------------------------------------------
   
-    await that.page.waitForSelector('#ContactFactorForm_eventDate')
+    await that.waitFor({selector: '#ContactFactorForm_eventDate'})
   
     await that.inputTgl({
       element: 'ContactFactorForm_eventDate',

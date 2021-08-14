@@ -72,7 +72,7 @@ exports._cariKonterByNIK = async ({ that, nik }) => {
 
   // // await that.page.waitForTimeout(5000)
 
-  await that.page.waitForSelector('#nik')
+  await that.waitFor({selector: '#nik'})
   // // await that.page.type('input#nik', '3372026504730002')
   await that.page.type('#nik', nik)
 
@@ -99,7 +99,7 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
   that.spinner.start(`catatKonfirmasiBaru`)
   await that.clickBtn({ text: 'Catat Kasus' })
 
-  await that.page.waitForSelector('#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button')
+  await that.waitFor({ selector : '#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button'})
   that.spinner.start(`input: confirmData.nik: ${confirmData.nik}, confirmData.nama: ${confirmData.nama}`)
 
   await that.inputTgl({

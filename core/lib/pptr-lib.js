@@ -73,6 +73,14 @@ exports._getPicker =  async ({ that }) => {
 
 }
 
+exports._waitFor = async({ that, selector}) => {
+  let el = await that.page.$(selector)
+  if(!el){
+    await that.page.waitForTimeout(100)
+    el = await that.page.$(selector)
+  }
+}
+
 exports._inputTgl = async ({ that, element, tgl }) => {
   that.spinner.start(`element: ${element}, tgl: ${tgl}`)
   let blnThn = that.changeToSlcBlnThn(tgl)
