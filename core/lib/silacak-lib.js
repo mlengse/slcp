@@ -27,30 +27,34 @@ exports._upsertData = async ({ that }) => {
 exports._cariConfirmByNIK = async ({ that, nik }) => {
   that.spinner.start(`cariConfirmByNIK ${nik}`)
 
-  let inputNIK = await that.page.$('input#nik')
+  await that.reload()
 
-  while(!inputNIK){
-    await that.page.reload()
+  // let inputNIK = await that.page.$('input#nik')
+
+  // while(!inputNIK){
+    // await that.findXPathAndClick({ xpath: `//a[contains(.,'Beranda')]`})
+    // await that.page.reload()
     // await that.page.waitForTimeout(500)
-    inputNIK = await that.page.$('input#nik')
+    // inputNIK = await that.waitFor({selector: 'input#nik'})
 
     // await that.page.waitForSelector('input#nik')
 
-  }
+  // }
 
   let [hapus] = await that.page.$x("//button[contains(., 'Hapus')]");
   if(hapus){
     await hapus.click();
   }
 
-  that.spinner.start(`cariConfirmByNIK nik: ${nik}`)
+  // that.spinner.start(`cariConfirmByNIK nik: ${nik}`)
   // await that.page.type('input#nik', '3372026504730002')
   await that.page.type('input#nik', nik)
 
-  await Promise.all([
-    that.clickBtn({ text: 'Filter'}),
-    that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
-  ])
+  await that.clickBtn({ text: 'Filter'})
+
+  await that.page.waitForTimeout(500)
+  //   that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
+  // ])
 
   // console.log(JSON.stringify(that.response[that.response.length-1].json))
   let [table] = await that.page.$x("//table[contains(., 'Nama')]")
@@ -67,17 +71,17 @@ exports._cariConfirmByNIK = async ({ that, nik }) => {
 exports._cariKonterByNIK = async ({ that, nik }) => {
   that.spinner.start(`cariKonterByNIK ${nik}`)
 
-  await that.page.waitForTimeout(1000)
+  // await that.page.waitForTimeout(1000)
 
-  await that.page.reload()
+  await that.reload()
 
   await that.findXPathAndClick({ xpath: `//span[contains(.,'2. Kontak Erat')]`})
 
   // // await that.page.waitForTimeout(5000)
 
-  await that.waitFor({selector: '#nik'})
+  await that.waitFor({selector: 'input#nik'})
   // // await that.page.type('input#nik', '3372026504730002')
-  await that.page.type('#nik', nik)
+  await that.page.type('input#nik', nik)
 
   // // console.log('mau klik')
 
@@ -120,14 +124,12 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
 
   let notif
 
-  for (let periksa of await that.page.$x(`//button[contains(.,'Periksa')]`)){
-    if (await that.isVisible({ el: periksa})){
-      await periksa.click()
-      await that.page.waitForResponse(response=> response.url().includes(confirmData.nik) && response.status() === 200)
-      for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
-        notif = await that.page.evaluate( el => el.innerText, el)
-      }
+  await that.findXPathAndClick({ xpath: `//button[contains(.,'Periksa')]`})
 
+  while(!notif){
+    await that.page.waitForTimeout(100)
+    for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
+      notif = await that.page.evaluate( el => el.innerText, el)
     }
   }
 
@@ -181,6 +183,10 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
   // let nikFindResponses = await that.response.filter( resp => resp.url.includes(confirmData.nik))
 
   // console.log(nikFindResponses[nikFindResponses.length-1].response)
+
+  confirmData.konfirm_silacak = true
+
+  await that.upsertPerson({ person: confirmData})
 
 
   // await that.page.waitForTimeout(5000)

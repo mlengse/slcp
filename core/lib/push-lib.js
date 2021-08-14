@@ -15,7 +15,7 @@ exports._pushConfirm = async ({ that, confirmData }) => {
       // await that.cariKonterByNIK({ nik: confirmData.nik})
       
       await that.catatKonfirmasiBaru({confirmData})
-      await that.page.reload()
+      await that.reload()
 
     } 
   }
@@ -45,7 +45,7 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
       let hrefEl = await row.$('td > a')
       let href = await that.page.evaluate( el => el.getAttribute('href').split('/')[el.getAttribute('href').split('/').length-1], hrefEl)
   
-      await hrefEl.click()
+      await row.$eval('td > a', a => a.click())
   
       // console.log(href)
   

@@ -35,7 +35,7 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
 
   while(!btnTambahKonter){
 
-    await that.page.reload()
+    await that.reload()
   
     await that.cariConfirmByNIK({nik: indeksKasus.nik})
   

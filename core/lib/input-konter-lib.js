@@ -26,21 +26,31 @@ exports._inputKonter = async ({ that, konterData }) => {
 
   let notif
 
-  for (let periksa of await that.page.$x(`//button[contains(.,'Periksa')]`)){
-    if (await that.isVisible({ el: periksa})){
-      await periksa.click()
-      await that.page.waitForResponse(response=> response.url().includes(konterData.nik) && response.status() === 200)
-      for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
-        notif = await that.page.evaluate( el => el.innerText, el)
-      }
+  await that.findXPathAndClick({ xpath: `//button[contains(.,'Periksa')]`})
 
+  while(!notif){
+    await that.page.waitForTimeout(100)
+    for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
+      notif = await that.page.evaluate( el => el.innerText, el)
     }
   }
+
+  // for (let periksa of await that.page.$x(`//button[contains(.,'Periksa')]`)){
+  //   if (await that.isVisible({ el: periksa})){
+  //     await periksa.click()
+      // await that.page.waitForResponse(response=> response.url().includes(konterData.nik) && response.status() === 200)
+      // for ( let el of [...await that.page.$$(`div.ant-notification`)]) {
+      //   notif = await that.page.evaluate( el => el.innerText, el)
+      // }
+
+    // }
+  // }
 
   notif && that.spinner.succeed(notif.split('\n').map(e => e.trim()).join(' '))
 
   if(notif && notif.toLowerCase().includes('belum terdaftar')){
-    await that.page.waitForTimeout(2000)
+    // await that.page.waitForTimeout(2000)
+    await that.page.waitForResponse(response=> response.status() === 200)
     let nama = await that.page.evaluate(() => document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
     // getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
     if(!nama.length){
@@ -104,9 +114,15 @@ exports._inputKonter = async ({ that, konterData }) => {
   
     await that.page.waitForTimeout('5000')
   
-    await that.page.waitForResponse(response=> response.status() === 200)
+    // await that.page.waitForResponse(response=> response.status() === 200)
   
   }
+
+  await that.page.reload()
+
+  konterData.konter_silacak = true
+
+  konterData = await that.upsertPerson({ person: konterData })
 
 
 }

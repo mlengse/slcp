@@ -7,6 +7,22 @@ const waitOpt = {
 exports.waitOpt = waitOpt      
 exports._waitNav = async ({ that }) => await that.page.waitForNavigation(waitOpt)
 
+exports._reload = async ({ that }) => {
+  let inputNIK = await that.page.$('input#nik')
+
+  while(!inputNIK){
+    await that.findXPathAndClick({ xpath: `//a[contains(.,'Beranda')]`})
+    // await that.page.reload()
+    // await that.page.waitForTimeout(500)
+    inputNIK = await that.waitFor({selector: 'input#nik'})
+
+    // await that.page.waitForSelector('input#nik')
+
+  }
+
+
+}
+
 exports._getInnerText = async({ that, el}) => await that.page.evaluate( el => el.innerText, el)
 
 exports._findXPathAndClick = async ({ that, xpath }) => {
@@ -14,12 +30,17 @@ exports._findXPathAndClick = async ({ that, xpath }) => {
   let visible = false
   while(!visible){
     for(let el of await that.page.$x(xpath)){
+      await that.page.evaluate(e => {
+        e.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'end' });
+      }, el);
       visible = await that.isVisible({ el })
       if(visible){
         // await el.focus()
         await el.evaluate( el => el.click())
       }
     }
+
+    await that.page.waitForTimeout(100)
   
   }
 
@@ -56,7 +77,7 @@ exports._getPicker =  async ({ that }) => {
   // that.spinner.start(`getPicker`)
   let pickerElement
   while(!pickerElement){
-    await that.page.waitForTimeout(500)
+    await that.page.waitForTimeout(100)
     let pickerElements = await that.page.$$('div.ant-picker-dropdown')
     that.spinner.start(`pickerElements.length ${[...pickerElements].length}`)
     for(let [id, pick] of Object.entries([...pickerElements])){
@@ -75,10 +96,12 @@ exports._getPicker =  async ({ that }) => {
 
 exports._waitFor = async({ that, selector}) => {
   let el = await that.page.$(selector)
-  if(!el){
+  while(!el){
     await that.page.waitForTimeout(100)
     el = await that.page.$(selector)
   }
+
+  return el
 
   // that.spinner.succeed(`${selector} found`)
 }
@@ -87,10 +110,11 @@ exports._inputTgl = async ({ that, element, tgl }) => {
   that.spinner.start(`element: ${element}, tgl: ${tgl}`)
   let blnThn = that.changeToSlcBlnThn(tgl)
   that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn ${blnThn}`)
-  await that.waitFor({ selector: `input#${element}`})
+  let input = await that.waitFor({ selector: `input#${element}`})
+  await input.click()
   // await that.page.waitForTimeout(500)
-  await that.page.click(`input#${element}`);
-  await that.page.waitForTimeout(500)
+  // await that.page.$eval(`input#${element}`, el => el.click());
+  // await that.page.waitForTimeout(500)
   let slash = that.slashToStrip(tgl)
   let pickerElement = await that.getPicker()
   let blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
@@ -159,13 +183,7 @@ exports._clickSelanjutnya = async({ that }) => await that.clickBtn({ text: 'Sela
 exports._clickBtn = async({ that, text}) => await that.findXPathAndClick({xpath: `//button[contains(., '${text}')]`});
 
 exports._gotoKonterTab = async({ that }) => {
-  let [kontakErat] = await that.page.$x("//div[contains(@class, 'ant-tabs-tab') and contains(.,'Kontak')]")
-  while(!kontakErat){
-    [kontakErat] = await that.page.$x("//div[contains(@class, 'ant-tabs-tab') and contains(.,'Kontak')]")
-  }
-
-  await kontakErat.click()
-
+  await that.findXPathAndClick({ xpath: "//div[contains(@class, 'ant-tabs-tab') and contains(.,'Kontak')]"})
 }
 
 exports._loginSilacak = async ({ that }) => {

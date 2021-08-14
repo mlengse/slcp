@@ -14,7 +14,7 @@ module.exports = async (isPM2) => {
     await app.cleanData()
     // await app.upsertData()
 
-    let num = 0
+    let num = 1
     for(let nik of app.indeksKasus)
     // if(app.filter14(app.people[nik].konfirm_tgl_onset))
     {
@@ -29,6 +29,7 @@ module.exports = async (isPM2) => {
         }
       }
 
+      app.spinner.succeed(`${num} ${person.nama} ${person.nik}${person.isKonter ? ` konter tgl_kontak ${person.konter_tgl_kontak}` : ''}${person.isKonfirm && person.isKonter? ' =>' : ''}${person.isKonfirm ? ` konfirm tgl_onset ${person.konfirm_tgl_onset}` : ''}`)
       let namaIndeks
       if(person.isKonter){
         let confirmData = app.people[Object.keys(app.people)
@@ -49,8 +50,8 @@ module.exports = async (isPM2) => {
             await app.convertKonterToKonfirm({ person, indeksKasus: confirmData })
           }
         }
+        // app.spinner.succeed(`${num} ${person.nama}${person.isKonter ? ` konter ${namaIndeks} tgl_kontak ${person.konter_tgl_kontak}` : ''}${person.isKonfirm && person.isKonter? ' =>' : ''}${person.isKonfirm ? ` konfirm tgl_onset ${person.konfirm_tgl_onset}` : ''}`)
       }
-      app.spinner.succeed(`${num} ${person.nama}${person.isKonter ? ` konter ${namaIndeks} tgl_kontak ${person.konter_tgl_kontak}` : ''}${person.isKonfirm && person.isKonter? ' =>' : ''}${person.isKonfirm ? ` konfirm tgl_onset ${person.konfirm_tgl_onset}` : ''}`)
       app.spinner.succeed(`---------------------------------------------------`)
       await app.upsertPerson({person})
     }
