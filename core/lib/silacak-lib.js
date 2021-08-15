@@ -27,19 +27,20 @@ exports._upsertData = async ({ that }) => {
 exports._cariConfirmByNIK = async ({ that, nik }) => {
   that.spinner.start(`cariConfirmByNIK ${nik}`)
 
-  await that.reload()
 
-  // let inputNIK = await that.page.$('input#nik')
+  let inputNIK = await that.page.$('input#nik')
 
-  // while(!inputNIK){
-    // await that.findXPathAndClick({ xpath: `//a[contains(.,'Beranda')]`})
-    // await that.page.reload()
+  while(!inputNIK){
+    let [beranda] = await that.page.$x(`//a[contains(.,'Beranda')]`)
+
+    beranda && await that.findXPathAndClick({ xpath: `//a[contains(.,'Beranda')]`})
+    !beranda && await that.page.reload()
     // await that.page.waitForTimeout(500)
-    // inputNIK = await that.waitFor({selector: 'input#nik'})
+    inputNIK = await that.waitFor({selector: 'input#nik'})
 
     // await that.page.waitForSelector('input#nik')
 
-  // }
+  }
 
   let [hapus] = await that.page.$x("//button[contains(., 'Hapus')]");
   if(hapus){
