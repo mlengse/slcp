@@ -47,9 +47,9 @@ module.exports = async (isPM2) => {
 
         if(person.isKonfirm){
           // 3. push konter (2) yg jadi konfirm
-          // if(!person.konfirm_silacak){
+          if(!person.konfirm_silacak){
             await app.convertKonterToKonfirm({ person, indeksKasus: confirmData })
-          // }
+          }
         }
         // app.spinner.succeed(`${num} ${person.nama}${person.isKonter ? ` konter ${namaIndeks} tgl_kontak ${person.konter_tgl_kontak}` : ''}${person.isKonfirm && person.isKonter? ' =>' : ''}${person.isKonfirm ? ` konfirm tgl_onset ${person.konfirm_tgl_onset}` : ''}`)
       }
