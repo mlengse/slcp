@@ -49,8 +49,10 @@ exports._inputKonter = async ({ that, konterData }) => {
   notif && that.spinner.succeed(notif.split('\n').map(e => e.trim()).join(' '))
 
   if(notif && notif.toLowerCase().includes('belum terdaftar')){
-    // await that.page.waitForTimeout(2000)
-    await that.page.waitForResponse(response=> response.status() === 200)
+    await Promise.all([
+      that.page.waitForTimeout(2000),
+      // that.page.waitForResponse(response=> response.status() === 200)
+    ])
     let nama = await that.page.evaluate(() => document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
     // getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
     if(!nama.length){
@@ -118,7 +120,7 @@ exports._inputKonter = async ({ that, konterData }) => {
   
   }
 
-  await that.page.reload()
+  await that.reload()
 
   konterData.konter_silacak = true
 

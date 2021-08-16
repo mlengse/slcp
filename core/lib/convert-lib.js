@@ -29,6 +29,7 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
 
   // that.spinner.succeed(`${JSON.stringify(person)}`)
   await that.loginSilacak()
+  let exists = false
 
   let btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText 
     && e.innerText.toLowerCase().includes(`tambah kontak erat baru` )).length)
@@ -37,33 +38,37 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
 
     await that.reload()
   
-    await that.cariConfirmByNIK({nik: indeksKasus.nik})
-  
-    let [row] = await that.page.$x(`//tr[contains(.,'${indeksKasus.nik}')]`)
-    while(!row){
-      await that.page.waitForTimeout(500);
-      [row] = await that.page.$x(`//tr[contains(.,'${indeksKasus.nik}')]`)
-    }
-    let hrefEl = await row.$('td > a')
-    let href = await that.page.evaluate( el => el.getAttribute('href').split('/')[el.getAttribute('href').split('/').length-1], hrefEl)
-  
-    await hrefEl.click()
-  
-    // console.log(href)
-  
-    await that.page.waitForResponse(response=> response.url().includes(href) && response.status() === 200)
-  
-    if(!indeksKasus.href){
-      indeksKasus.href = href
-    }  
-  
-    await that.gotoKonterTab()
+    exists = await that.cariConfirmByNIK({confirmData: indeksKasus})
 
-    btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText 
-      && e.innerText.toLowerCase().includes(`tambah kontak erat baru` )).length)
+    if(exists){
+      let [row] = await that.page.$x(`//tr[contains(.,'${indeksKasus.nik}')]`)
+      while(!row){
+        await that.page.waitForTimeout(500);
+        [row] = await that.page.$x(`//tr[contains(.,'${indeksKasus.nik}')]`)
+      }
+      let hrefEl = await row.$('td > a')
+      let href = await that.page.evaluate( el => el.getAttribute('href').split('/')[el.getAttribute('href').split('/').length-1], hrefEl)
+    
+      await hrefEl.click()
+    
+      // console.log(href)
+    
+      await that.page.waitForResponse(response=> response.url().includes(href) && response.status() === 200)
+    
+      if(!indeksKasus.href){
+        indeksKasus.href = href
+      }  
+    
+      await that.gotoKonterTab()
+  
+      btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText 
+        && e.innerText.toLowerCase().includes(`tambah kontak erat baru` )).length)
+  
+    }
+  
   }
 
-  let exists = false
+  exists = false
   
   // await that.page.waitForResponse(response=> response.url().includes(`Gf4Ojyk54rO`) && response.status() === 200)
   await that.page.waitForTimeout(500);

@@ -24,32 +24,15 @@ exports._upsertData = async ({ that }) => {
 
 
 
-exports._cariConfirmByNIK = async ({ that, nik }) => {
-  that.spinner.start(`cariConfirmByNIK ${nik}`)
+exports._cariConfirmByNIK = async ({ that, confirmData }) => {
+  that.spinner.start(`cariConfirmByNIK ${confirmData.nik}`)
+  let exists
 
-
-  let inputNIK = await that.page.$('input#nik')
-
-  while(!inputNIK){
-    let [beranda] = await that.page.$x(`//a[contains(.,'Beranda')]`)
-
-    beranda && await that.findXPathAndClick({ xpath: `//a[contains(.,'Beranda')]`})
-    !beranda && await that.page.reload()
-    // await that.page.waitForTimeout(500)
-    inputNIK = await that.waitFor({selector: 'input#nik'})
-
-    // await that.page.waitForSelector('input#nik')
-
-  }
-
-  let [hapus] = await that.page.$x("//button[contains(., 'Hapus')]");
-  if(hapus){
-    await hapus.click();
-  }
+  await that.reload()
 
   // that.spinner.start(`cariConfirmByNIK nik: ${nik}`)
   // await that.page.type('input#nik', '3372026504730002')
-  await that.page.type('input#nik', nik)
+  await that.page.type('input#nik', confirmData.nik)
 
   await that.clickBtn({ text: 'Filter'})
 
@@ -64,7 +47,31 @@ exports._cariConfirmByNIK = async ({ that, nik }) => {
     ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
   }
   await that.page.waitForTimeout(500)
-  let exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
+  exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
+
+  if(!exists){
+    await app.pushConfirm({ confirmData: person })
+
+    await that.reload()
+    
+    await that.page.type('input#nik', confirmData.nik)
+  
+    await that.clickBtn({ text: 'Filter'})
+  
+    await that.page.waitForTimeout(500)
+    //   that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
+    // ])
+  
+    // console.log(JSON.stringify(that.response[that.response.length-1].json))
+    ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
+    while(!table){
+      await that.page.waitForTimeout(500)
+      ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
+    }
+    await that.page.waitForTimeout(500)
+    exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
+  
+  }
   // that.spinner.succeed(`cariConfirmByNIK nik: ${nik}, exists: ${exists}`)
   return exists
 }
@@ -137,7 +144,10 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
   notif && that.spinner.succeed(notif.split('\n').map(e => e.trim()).join(' '))
 
   if(notif && notif.toLowerCase().includes('belum terdaftar')){
-    await that.page.waitForTimeout(2000)
+    await Promise.all([
+      that.page.waitForTimeout(2000),
+      // that.page.waitForResponse(response=> response.status() === 200)
+    ])
     let nama = await that.page.evaluate(() => document.getElementById('CovidCaseProfileForm_GdwLfGObIRT').getAttribute('value'))
     // getInnerText({ el: '#CovidCaseProfileForm_GdwLfGObIRT'})
     if(!nama.length){

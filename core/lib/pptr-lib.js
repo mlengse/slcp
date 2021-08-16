@@ -10,14 +10,22 @@ exports._waitNav = async ({ that }) => await that.page.waitForNavigation(waitOpt
 exports._reload = async ({ that }) => {
   let inputNIK = await that.page.$('input#nik')
 
+
   while(!inputNIK){
-    await that.findXPathAndClick({ xpath: `//a[contains(.,'Beranda')]`})
-    // await that.page.reload()
+    let [beranda] = await that.page.$x(`//a[contains(.,'Beranda')]`)
+
+    beranda && await that.findXPathAndClick({ xpath: `//a[contains(.,'Beranda')]`})
+    !beranda && await that.reload()
     // await that.page.waitForTimeout(500)
     inputNIK = await that.waitFor({selector: 'input#nik'})
 
     // await that.page.waitForSelector('input#nik')
 
+  }
+
+  let [hapus] = await that.page.$x("//button[contains(., 'Hapus')]");
+  if(hapus){
+    await hapus.click();
   }
 
 
