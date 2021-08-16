@@ -1,7 +1,7 @@
 const pptr = require('puppeteer-core')
 const waitOpt = {
   waitUntil: 'networkidle0',
-  // timeout: 0
+  timeout: 0
 }
 
 exports.waitOpt = waitOpt      
