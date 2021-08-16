@@ -53,13 +53,16 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
     
       // console.log(href)
     
-      await that.page.waitForResponse(response=> response.url().includes(href) && response.status() === 200)
+      await that.page.waitForResponse(response=> response.url().includes('.json') && response.url().includes(href) && response.status() === 200)
     
       if(!indeksKasus.href){
         indeksKasus.href = href
       }  
-    
+
+      await that.page.waitForTimeout(2000);
+
       await that.gotoKonterTab()
+      await that.page.waitForTimeout(2000);
   
       btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText 
         && e.innerText.toLowerCase().includes(`tambah kontak erat baru` )).length)

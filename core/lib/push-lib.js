@@ -1,23 +1,23 @@
 exports._pushConfirm = async ({ that, confirmData }) => {
-  that.spinner.start(`pushConfirm`)
+  that.spinner.start(`pushConfirm ${confirmData.nama} ${confirmData.nik}`)
   if(!confirmData.konfirm_silacak) {
     // push ke silacak
     await that.loginSilacak()
 
-    let exists = await that.cariConfirmByNIK({ confirmData})
+    // let exists = await that.cariConfirmByNIK({ confirmData})
 
-    exists && await that.upsertPerson({person: Object.assign({}, confirmData, {
-      konfirm_silacak: true
-    })})
+    // exists && await that.upsertPerson({person: Object.assign({}, confirmData, {
+    //   konfirm_silacak: true
+    // })})
 
-    if(!exists){
+    // if(!exists){
 
       // await that.cariKonterByNIK({ nik: confirmData.nik})
       
       await that.catatKonfirmasiBaru({confirmData})
-      await that.reload()
+      // await that.reload()
 
-    } 
+    // } 
   }
   // that.spinner.succeed(`sudah ada ${confirmData.nik} ${confirmData.nama}`)
 
@@ -50,13 +50,16 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
     
         // console.log(href)
     
-        await that.page.waitForResponse(response=> response.url().includes(href) && response.status() === 200)
+        await that.page.waitForResponse(response=> response.url().includes('.json') && response.url().includes(href) && response.status() === 200)
     
         if(!confirmData.href){
           confirmData.href = href
         }  
   
+        await that.page.waitForTimeout(2000);
+  
         await that.gotoKonterTab()
+        await that.page.waitForTimeout(2000);
   
         let btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText 
           && e.innerText.toLowerCase().includes(`tambah kontak erat baru` )).length)
@@ -69,7 +72,6 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
         let exists = false
         
         // await that.page.waitForResponse(response=> response.url().includes(`Gf4Ojyk54rO`) && response.status() === 200)
-        await that.page.waitForTimeout(5000);
   
         let noKonter = await that.page.$$eval('div.ant-empty', els => els && els.length && [...els].filter( e => e.innerText 
           && e.innerText.toLowerCase().includes('tidak ada kontak erat')).length)

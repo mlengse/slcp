@@ -8,16 +8,23 @@ exports.waitOpt = waitOpt
 exports._waitNav = async ({ that }) => await that.page.waitForNavigation(waitOpt)
 
 exports._reload = async ({ that }) => {
+
+  // that.spinner.start('reload')
+  await that.page.waitForTimeout(500)
   let inputNIK = await that.page.$('input#nik')
 
 
   while(!inputNIK){
     let [beranda] = await that.page.$x(`//a[contains(.,'Beranda')]`)
 
-    beranda && await that.findXPathAndClick({ xpath: `//a[contains(.,'Beranda')]`})
-    !beranda && await that.reload()
-    // await that.page.waitForTimeout(500)
-    inputNIK = await that.waitFor({selector: 'input#nik'})
+    if(beranda){
+      await that.findXPathAndClick({ xpath: `//a[contains(.,'Beranda')]`})
+    } else {
+      await that.page.reload()
+    }
+
+    await that.page.waitForTimeout(500)
+    inputNIK = await that.page.$('input#nik')
 
     // await that.page.waitForSelector('input#nik')
 
@@ -34,7 +41,7 @@ exports._reload = async ({ that }) => {
 exports._getInnerText = async({ that, el}) => await that.page.evaluate( el => el.innerText, el)
 
 exports._findXPathAndClick = async ({ that, xpath }) => {
-  that.spinner.start(`findXPathAndClick ${xpath}`)
+  // that.spinner.start(`findXPathAndClick ${xpath}`)
   let visible = false
   while(!visible){
     for(let el of await that.page.$x(xpath)){
