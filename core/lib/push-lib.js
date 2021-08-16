@@ -69,7 +69,7 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
         let exists = false
         
         // await that.page.waitForResponse(response=> response.url().includes(`Gf4Ojyk54rO`) && response.status() === 200)
-        await that.page.waitForTimeout(500);
+        await that.page.waitForTimeout(5000);
   
         let noKonter = await that.page.$$eval('div.ant-empty', els => els && els.length && [...els].filter( e => e.innerText 
           && e.innerText.toLowerCase().includes('tidak ada kontak erat')).length)
