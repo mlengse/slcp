@@ -27,7 +27,7 @@ exports._cariKonterByNIK = async ({ that, nik }) => {
   let exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, nik)
   // console.log(confirmData.nik, exists)
 
-  // that.spinner.succeed(`cariKonterByNIK ${nik} exists: ${exists}`)
+  that.spinner.succeed(`cariKonterByNIK ${nik} exists: ${exists}`)
 
   return exists
 

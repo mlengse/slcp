@@ -22,6 +22,8 @@ exports._inputConvert =  async ({ that, person }) => {
   await that.findXPathAndClick({ xpath: '//button[contains(@class, "ant-btn-sm") and contains(.,"Ya")]'})
   await that.page.waitForTimeout(5000)
 
+  await that.spinner.succeed(`ubah konter ${person.nama} tgl tes ${person.konter_tgl_onset}`)
+
 
 
 }
@@ -94,7 +96,7 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
       person.konter_nama_tersimpan = await that.page.evaluate( nik => {
         return [...document.querySelectorAll('tr.ant-table-row')]
         .filter(e => e.innerText.includes(nik))
-        .map( e => e.innerText.split('\n')[0] )
+        .map( e => e.innerText.split('\n')[0] )[0]
       }, person.nik)
       // console.log(person.konter_nama_tersimpan)
       let rows = await that.page.$x(`//tr[contains(.,'${person.konter_nama_tersimpan}')]`)
@@ -117,28 +119,9 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
 
       }
 
-      // let trs = await that.page.$$('tr.ant-table-row')
-      // // console.log('trs.length', trs.length)
-      // if(trs.length) for(let tr of trs) {
-      //   let td = await tr.$('td.ant-table-cell > a')
-      //   if(td){
-      //     let nama = await td.evaluate( a => a.innerText)
-      //     // console.log(nama)
-      //     while(!nama){
-      //       await that.page.waitForTimeout(500);
-      //       nama = await td.evaluate( a => a.innerText)
-      //     }
-          
-      //   }
-      // }
     }
-    // that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${person.nik}, exists: ${exists}`)
 
-
-    //==============================================================
 
   } 
 
-
-  // await that.page.waitForTimeout(10000)
 }

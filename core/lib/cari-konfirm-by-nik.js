@@ -33,7 +33,7 @@ exports._cariConfirmByNIK = async ({ that, confirmData }) => {
       let namaIndeks = confirmData.nama
       that.spinner.succeed(`${person.nama} ${person.nik}${person.isKonter ? ` konter ${namaIndeks} tgl_kontak ${person.konter_tgl_kontak}` : ''}${person.isKonfirm && person.isKonter? ' =>' : ''}${person.isKonfirm ? ` konfirm tgl_onset ${person.konfirm_tgl_onset}` : ''}`)
       // 2. push konter dari konfirm (1)
-      console.log(confirmData)
+      // console.log(confirmData)
       if(!person.konter_silacak){
         await that.pushKonter({ 
           konterData: person, 
