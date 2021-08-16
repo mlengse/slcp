@@ -21,14 +21,6 @@ module.exports = async (isPM2) => {
 
       let person = await app.upsertPerson({person: app.people[nik]})
 
-      // if(person.isKonfirm && !person.isKonter){
-      //   num++
-      //   if(!person.konfirm_silacak){
-      //     // 1. push konfirm yg !konter
-      //     await app.pushConfirm({ confirmData: person })
-      //   }
-      // }
-
       let namaIndeks
       if(person.isKonter){
         num++

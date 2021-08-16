@@ -90,13 +90,13 @@ exports._isVisible = async ({ that, el }) => {
 
 exports._getPicker =  async ({ that }) => {
   // that.spinner.start(`getPicker`)
-  let pickerElement
+  let pickerElement, pickerElements, cl
   while(!pickerElement){
     await that.page.waitForTimeout(100)
-    let pickerElements = await that.page.$$('div.ant-picker-dropdown')
-    that.spinner.start(`pickerElements.length ${[...pickerElements].length}`)
-    for(let [id, pick] of Object.entries([...pickerElements])){
-      let cl = await that.isVisible({ el: pick})
+    pickerElements = await that.page.$$('div.ant-picker-dropdown')
+    that.spinner.start(`pickerElements.length ${pickerElements.length}`)
+    for(let pick of pickerElements){
+      cl = await that.isVisible({ el: pick})
       // that.spinner.start(`pickerElement ${id} visibility: ${cl}`)
       if(cl){
         pickerElement = pick
@@ -126,23 +126,24 @@ exports._inputTgl = async ({ that, element, tgl }) => {
   let blnThn = that.changeToSlcBlnThn(tgl)
   that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn ${blnThn}`)
   let input = await that.waitFor({ selector: `input#${element}`})
-  await input.click()
-  // await that.page.waitForTimeout(500)
-  // await that.page.$eval(`input#${element}`, el => el.click());
-  // await that.page.waitForTimeout(500)
+  await input.evaluate( e => e.click())
   let slash = that.slashToStrip(tgl)
   let pickerElement = await that.getPicker()
   let blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
   let diff = that.getTglDiff(blnThnDef, blnThn)
   that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
   let left = await pickerElement.$('button.ant-picker-header-prev-btn > span')
-  while (diff !== 0 && blnThn !== blnThnDef){
+  while (diff > 0 && blnThn !== blnThnDef){
+    // await input.evaluate( e => e.click())
     pickerElement = await that.getPicker()
     blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
     diff = that.getTglDiff(blnThnDef, blnThn)
     left = await pickerElement.$('button.ant-picker-header-prev-btn > span.ant-picker-prev-icon')
     if(left){
-      await left.click()
+      await left.evaluate(e => {
+        e.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'end' });
+      }, el);
+      await left.evaluate( e => e.click())
       await that.page.waitForTimeout(500)
       blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
       diff = that.getTglDiff(blnThnDef, blnThn)

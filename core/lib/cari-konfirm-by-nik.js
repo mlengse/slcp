@@ -48,7 +48,7 @@ exports._cariConfirmByNIK = async ({ that, confirmData }) => {
           exists = await that.cariConfirmByNIK({confirmData: person})
         }
       }
-      // app.spinner.succeed(`${num} ${person.nama}${person.isKonter ? ` konter ${namaIndeks} tgl_kontak ${person.konter_tgl_kontak}` : ''}${person.isKonfirm && person.isKonter? ' =>' : ''}${person.isKonfirm ? ` konfirm tgl_onset ${person.konfirm_tgl_onset}` : ''}`)
+      that.spinner.succeed(`${person.nama}${person.isKonter ? ` konter ${namaIndeks} tgl_kontak ${person.konter_tgl_kontak}` : ''}${person.isKonfirm && person.isKonter? ' =>' : ''}${person.isKonfirm ? ` konfirm tgl_onset ${person.konfirm_tgl_onset}` : ''}`)
 
     } else {
       that.spinner.start(`pushConfirm ${confirmData.nama}`)

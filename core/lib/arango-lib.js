@@ -139,8 +139,6 @@ exports._upsertPerson = async({ that, person}) => {
     })
     return upsertData.NEW
   } else {
-		person = that.upsertPersonJSON(person)
+		return that.upsertPersonJSON(person)
 	}
-
-	return person
 }

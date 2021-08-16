@@ -1,5 +1,5 @@
 exports._inputConvert =  async ({ that, person }) => {
-  await that.waitFor({selector: '#FollowUpForm_eventDate'})
+  // await that.waitFor({selector: '#FollowUpForm_eventDate'})
   
   await that.inputTgl({
     element: 'FollowUpForm_eventDate',
@@ -48,9 +48,9 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
       }
       let hrefEl = await row.$('td > a')
       let href = await that.page.evaluate( el => el.getAttribute('href').split('/')[el.getAttribute('href').split('/').length-1], hrefEl)
-    
-      await hrefEl.click()
-    
+      
+      await row.$eval('td > a', e => e.click())
+      
       // console.log(href)
     
       await that.page.waitForResponse(response=> response.url().includes('.json') && response.url().includes(href) && response.status() === 200)
@@ -91,39 +91,46 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
     exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, person.nik)
     // console.log(exists)
     if(exists){
-      let trs = await that.page.$$('tr.ant-table-row')
-      // console.log('trs.length', trs.length)
-      if(trs.length) for(let tr of trs) {
-        let td = await tr.$('td.ant-table-cell > a')
-        if(td){
-          let nama = await td.evaluate( a => a.innerText)
-          // console.log(nama)
-          while(!nama){
-            await that.page.waitForTimeout(500);
-            nama = await td.evaluate( a => a.innerText)
-          }
-          
-          let rows = await that.page.$x(`//tr[contains(.,'${nama}')]`)
-          if(rows.length) for (let row of rows) {
-            // console.log(row[0])
-            let hari = await row.$(`td.ant-table-cell[style="text-align: center;"]:nth-child(${1+Number(person.selisihEntryOnset)})`)
-            // console.log(!!hari)
-            if(hari){
-              let sudah = await hari.$('span.anticon.anticon-plus-circle')
-              if(!sudah){
-                that.spinner.succeed(`${nama} tgl entry ${person.konter_tgl_entry} terkonfirmasi setelah karantina hari ke-${person.selisihEntryOnset} di tgl ${person.konfirm_tgl_onset}`)
-                await hari.evaluate( e => e.click())
-                await that.inputConvert({ person })
-                // console.log('sudah klik')
-
-              }
-            }
-
-            person.konfirm_silacak = true
+      person.konter_nama_tersimpan = await that.page.evaluate( nik => {
+        return [...document.querySelectorAll('tr.ant-table-row')]
+        .filter(e => e.innerText.includes(nik))
+        .map( e => e.innerText.split('\n')[0] )
+      }, person.nik)
+      // console.log(person.konter_nama_tersimpan)
+      let rows = await that.page.$x(`//tr[contains(.,'${person.konter_nama_tersimpan}')]`)
+      if(rows.length) for (let row of rows) {
+        // console.log(row[0])
+        let hari = await row.$(`td.ant-table-cell[style="text-align: center;"]:nth-child(${1+Number(person.selisihEntryOnset)})`)
+        // console.log(!!hari)
+        if(hari){
+          let sudah = await hari.$('span.anticon.anticon-plus-circle')
+          if(!sudah){
+            that.spinner.succeed(`${person.konter_nama_tersimpan} tgl entry ${person.konter_tgl_entry} terkonfirmasi setelah karantina hari ke-${person.selisihEntryOnset} di tgl ${person.konfirm_tgl_onset}`)
+            await hari.evaluate( e => e.click())
+            await that.inputConvert({ person })
+            // console.log('sudah klik')
 
           }
         }
+
+        person.konfirm_silacak = true
+
       }
+
+      // let trs = await that.page.$$('tr.ant-table-row')
+      // // console.log('trs.length', trs.length)
+      // if(trs.length) for(let tr of trs) {
+      //   let td = await tr.$('td.ant-table-cell > a')
+      //   if(td){
+      //     let nama = await td.evaluate( a => a.innerText)
+      //     // console.log(nama)
+      //     while(!nama){
+      //       await that.page.waitForTimeout(500);
+      //       nama = await td.evaluate( a => a.innerText)
+      //     }
+          
+      //   }
+      // }
     }
     // that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${person.nik}, exists: ${exists}`)
 
