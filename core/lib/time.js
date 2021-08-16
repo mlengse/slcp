@@ -9,6 +9,8 @@ const getBaseDate = () => {
   return baseDate
 }
 
+exports.list13 = () => [...Array(12).keys()].map( n => moment().subtract(n, 'days').format('DD/MM/YYYY'))
+
 exports.tambah6 = tgl => moment(tgl, 'DD/MM/YYYY').add(6, 'days').format('DD/MM/YYYY')
 exports.tambah1 = tgl => moment(tgl, 'DD/MM/YYYY').add(1, 'days').format('DD/MM/YYYY')
 exports.kurang1 = tgl => moment(tgl, 'DD/MM/YYYY').add(-1, 'days').format('DD/MM/YYYY')

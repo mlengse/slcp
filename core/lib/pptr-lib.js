@@ -90,13 +90,15 @@ exports._isVisible = async ({ that, el }) => {
 
 exports._getPicker =  async ({ that }) => {
   // that.spinner.start(`getPicker`)
-  let pickerElement
+  let pickerElement = false
+  let pickerElements = []
+  let cl = false
   while(!pickerElement){
     await that.page.waitForTimeout(100)
-    let pickerElements = await that.page.$$('div.ant-picker-dropdown')
-    that.spinner.start(`pickerElements.length ${[...pickerElements].length}`)
-    for(let [id, pick] of Object.entries([...pickerElements])){
-      let cl = await that.isVisible({ el: pick})
+    pickerElements = await that.page.$$('div.ant-picker-dropdown')
+    that.spinner.start(`pickerElements.length ${pickerElements.length}`)
+    for(let pick of pickerElements){
+      cl = await that.isVisible({ el: pick})
       // that.spinner.start(`pickerElement ${id} visibility: ${cl}`)
       if(cl){
         pickerElement = pick
@@ -140,35 +142,44 @@ exports._inputTgl = async ({ that, element, tgl }) => {
     blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
     diff = that.getTglDiff(blnThnDef, blnThn)
     left = await pickerElement.$('button.ant-picker-header-prev-btn > span')
-    // console.log(!!left)
-    if(left){
-      await left.click()
-      await that.page.waitForTimeout(500)
-      blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
-      diff = that.getTglDiff(blnThnDef, blnThn)
-      that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
+    while(!left){
+      await that.page.waitForTimeout(100)
+      left = await pickerElement.$('button.ant-picker-header-prev-btn > span')
+      that.spinner.start(`left button ${left}`)
     }
+    // console.log(!!left)
+    await left.click()
+    await that.page.waitForTimeout(500)
+    blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
+    diff = that.getTglDiff(blnThnDef, blnThn)
+    that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
   }
+  // console.log(diff, blnThn, blnThnDef)
   // await that.page.waitForTimeout(500)
   let td, tgll
   let num = 0
+  let tds = []
+  let tdVis = false
+  let tgls = that.list13()
+  // console.log(tgls)
   while(!td){
-    let tds = await that.page.$x(`//td[contains(@title, '${slash}')]`)
+    tds = await that.page.$x(`//td[contains(@title, '${slash}')]`)
     if(tds.length) for(let tt of tds){
-      let tdVis = await that.isVisible({ el: tt })
+      tdVis = await that.isVisible({ el: tt })
       if(tdVis){
         td = tt
         tgll = await td.evaluate( el => el.innerText)
       }
       that.spinner.start(`tdVis: ${tdVis}, tgll: ${tgll}, slash: ${slash}`)
     }
-    if(num%20 === 0){
-      tgl = that.kurang1(tgl)
+    if(num%10 === 0){
+      tgl = tgls.shift()
       slash = that.slashToStrip(tgl)
     }
-    await that.page.waitForTimeout(500)
+    await that.page.waitForTimeout(100)
     num++
   }
+
   await td.click()
   await that.page.waitForTimeout(500)
 }

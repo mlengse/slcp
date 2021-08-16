@@ -3,7 +3,8 @@ exports._cleanData = async ({ that }) => {
   await that.fixTgl()
 
   for(let nik of Object.keys(that.people)){
-    let person = that.people[nik]
+    let person = Object.assign({}, await that.upsertPerson({person: that.people[nik]}), that.people[nik])
+
 
     if(person.isKonfirm){
       // that.spinner.start(`konfirm_tgl_onset: ${person.konfirm_tgl_onset}`)
@@ -16,6 +17,9 @@ exports._cleanData = async ({ that }) => {
       person.jk = person.jk.toLowerCase() === 'l' ? 'Laki' : 'Perempuan'
 
       Object.keys(person).map( k => {
+        if(person[k] && typeof person[k] === 'String' && person[k].toLowerCase().includes('invalid')){
+          delete person[k]
+        }
         if(k.includes('konfirm') && k.includes('rujukan')){
           person.konfirm_tindakan = person[k]
           delete person[k]
@@ -56,6 +60,9 @@ exports._cleanData = async ({ that }) => {
       person.jk = person.jk.toLowerCase() === 'l' ? 'Laki' : 'Perempuan'
 
       Object.keys(person).map( k => {
+        if(person[k] && typeof person[k] === 'String' && person[k].toLowerCase().includes('invalid')){
+          delete person[k]
+        }
         if(k.includes('indeks') && !k.includes('hubungan')){
           person.konter_indeks = person[k]
           delete person[k]
@@ -74,13 +81,13 @@ exports._cleanData = async ({ that }) => {
       })
 
       if(!person.konter_tgl_kontak){
-        person.konter_tgl_kontak = that.kurang1(person.konter_tanggal_wawancara || person.konter_tanggal_lapor)
+        person.konter_tgl_kontak = that.kurang1(person.konter_tanggal_wawancara || person.konter_tgl_wawancara || person.konter_tanggal_lapor)
       }
       if(!person.konter_tgl_entry){
-        person.konter_tgl_entry = that.tambah1(person.konter_tanggal_wawancara || person.konter_tanggal_lapor)
+        person.konter_tgl_entry = that.tambah1(person.konter_tgl_kontak)
       }
       if(!person.konter_tgl_exit){
-        person.konter_tgl_exit = that.tambah6(person.konter_tanggal_wawancara || person.konter_tanggal_lapor)
+        person.konter_tgl_exit = that.tambah6(person.konter_tgl_kontak)
       }
 
       if(person.konter_indeks && person.konter_indeks.toLowerCase().includes('no')){

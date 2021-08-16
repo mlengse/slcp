@@ -19,7 +19,15 @@ module.exports = async (isPM2) => {
     // if(app.filter14(app.people[nik].konfirm_tgl_onset))
     {
 
-      let person = await app.upsertPerson({person: app.people[nik]})
+      let person = app.people[nik]
+
+      // if(person.isKonfirm && !person.isKonter){
+      //   num++
+      //   if(!person.konfirm_silacak){
+      //     // 1. push konfirm yg !konter
+      //     await app.pushConfirm({ confirmData: person })
+      //   }
+      // }
 
       let namaIndeks
       if(person.isKonter){

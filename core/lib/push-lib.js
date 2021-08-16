@@ -90,7 +90,7 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
       if(exists) {
         konterData.konter_silacak = true
         konterData = await that.upsertPerson({ person: konterData })
-        that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${konterData.nik}, exists: ${exists}, konter_silacak: ${konterData.konter_silacak}`)
+        that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${konterData.nik}, exists: ${exists}, konter_silacak: ${!!konterData.konter_silacak}`)
       }
 
   

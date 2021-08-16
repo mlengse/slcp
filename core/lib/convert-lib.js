@@ -22,7 +22,7 @@ exports._inputConvert =  async ({ that, person }) => {
   await that.findXPathAndClick({ xpath: '//button[contains(@class, "ant-btn-sm") and contains(.,"Ya")]'})
   await that.page.waitForTimeout(5000)
 
-  await that.spinner.succeed(`ubah konter ${person.nama} tgl tes ${person.konter_tgl_onset}`)
+  await that.spinner.succeed(`ubah konter ${person.nama} tgl tes ${person.konfirm_tgl_onset}`)
 
 
 
