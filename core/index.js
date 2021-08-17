@@ -9,6 +9,7 @@ module.exports = class Core {
     }
     this.config = config
     this.kunjBlnIni = []
+    this.response = []
     // this.response = ''
 
     for( let func in obj) {

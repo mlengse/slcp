@@ -45,20 +45,27 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
     let hrefEl = await row.$('td > a')
     let href = await that.page.evaluate( el => el.getAttribute('href').split('/')[el.getAttribute('href').split('/').length-1], hrefEl)
 
-    await row.$eval('td > a', a => a.click())
-
+    that.response = false
+      
+    await row.$eval('td > a', e => e.click())
+    
     // console.log(href)
-
-    await that.page.waitForResponse(response=> response.url().includes('.json') && response.url().includes(href) && response.status() === 200)
-
+  
+    // await that.page.waitForResponse(response=> response.url().includes('.json') && response.url().includes(href) && response.status() === 200)
+  
     if(!confirmData.href){
       confirmData.href = href
     }  
 
-    await that.page.waitForTimeout(2000);
 
     await that.gotoKonterTab()
-    await that.page.waitForTimeout(2000);
+
+    while(!that.response){
+      await that.page.waitForTimeout(100)
+    }
+  
+    // console.log(that.response)
+
 
     let btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText 
       && e.innerText.toLowerCase().includes(`tambah kontak erat baru` )).length)
@@ -89,8 +96,10 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
 
       if(exists) {
         konterData.konter_silacak = true
-        konterData = await that.upsertPerson({ person: konterData })
-        that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${konterData.nik}, exists: ${exists}, konter_silacak: ${!!konterData.konter_silacak}`)
+        konterData = Object.assign({}, await that.upsertPerson({ person: Object.assign({}, konterData, {
+          konter_silacak: true
+        }) }), konterData)
+        that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${konterData.nik}, exists: ${exists}, konter_silacak: ${konterData.konter_silacak}`)
       }
 
   
@@ -103,6 +112,13 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
     }
 
   }
+  // if(that.response.length) for(let konter of that.response) if(JSON.stringify(konter).includes(konterData.nik)){
+  //   // that.spinner.succeed(`${JSON.stringify(konter)}`)
+  //   let from = Object.fromEntries(konter.from.trackedEntityInstance.attributes.map( e => ([e.code, e.value])))
+  //   let to = Object.fromEntries(konter.to.trackedEntityInstance.attributes.map( e => ([e.code, e.value])))
+  //   that.spinner.succeed(`from ${JSON.stringify(from)}`)
+  //   that.spinner.succeed(`to ${JSON.stringify(to)}`)
+  // }
   
 }
 

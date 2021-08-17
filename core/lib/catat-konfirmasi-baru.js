@@ -68,7 +68,7 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
 
     await that.page.waitForTimeout('5000')
       
-    await that.page.waitForResponse(response=> response.status() === 200)
+    // await that.page.waitForResponse(response=> response.status() === 200)
 
     await that.upsertPerson({ person: Object.assign({}, confirmData, {
       konfirm_silacak: true

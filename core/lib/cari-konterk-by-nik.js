@@ -19,7 +19,7 @@ exports._cariKonterByNIK = async ({ that, nik }) => {
 
   // // console.log('filter')
 
-  await that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
+  // await that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
   let [table] = await that.page.$x("//table[contains(., 'Nama')]")
   while(!table){
     [table] = await that.page.$x("//table[contains(., 'Nama')]")

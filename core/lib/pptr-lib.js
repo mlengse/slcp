@@ -234,6 +234,17 @@ exports._initBrowser = async ({ that }) => {
     that.Browser = await pptr.launch(that.config.pptrOpt)
     that.pages = await that.Browser.pages()
     that.page = that.pages[0]
+
+    that.page.on('response', async response => {
+      if(response.request().resourceType() === 'xhr' && response.ok() && response.url().includes('relationships.json')){
+        that.response = await response.json()
+        // for(let konter of konters){
+        //   console.log(JSON.stringify(konter))
+        // }
+        // that.response = konters
+
+      }
+    })
     
     await that.page.goto(`${that.config.SILACAK_URL}`, waitOpt)
     

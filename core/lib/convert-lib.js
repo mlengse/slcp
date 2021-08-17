@@ -29,6 +29,8 @@ exports._inputConvert =  async ({ that, person }) => {
 }
 exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
 
+  // that.response = false
+
   // that.spinner.succeed(`${JSON.stringify(person)}`)
   await that.loginSilacak()
   let exists = false
@@ -51,21 +53,28 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
       let hrefEl = await row.$('td > a')
       let href = await that.page.evaluate( el => el.getAttribute('href').split('/')[el.getAttribute('href').split('/').length-1], hrefEl)
       
+      that.response = false
+      
       await row.$eval('td > a', e => e.click())
       
       // console.log(href)
     
-      await that.page.waitForResponse(response=> response.url().includes('.json') && response.url().includes(href) && response.status() === 200)
+      // await that.page.waitForResponse(response=> response.url().includes('.json') && response.url().includes(href) && response.status() === 200)
     
       if(!indeksKasus.href){
         indeksKasus.href = href
       }  
 
-      await that.page.waitForTimeout(2000);
+      // await that.page.waitForTimeout(2000);
 
       await that.gotoKonterTab()
-      await that.page.waitForTimeout(2000);
-  
+      // await that.page.waitForTimeout(2000);
+      while(!that.response){
+        await that.page.waitForTimeout(100)
+      }
+    
+      // console.log(that.response)
+      
       btnTambahKonter = await that.page.$$eval('button.ant-btn-primary', els => els && els.length && [...els].filter( e => e.innerText 
         && e.innerText.toLowerCase().includes(`tambah kontak erat baru` )).length)
   
@@ -74,9 +83,9 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
   }
 
   exists = false
+
   
   // await that.page.waitForResponse(response=> response.url().includes(`Gf4Ojyk54rO`) && response.status() === 200)
-  await that.page.waitForTimeout(5000);
 
   let noKonter = await that.page.$$eval('div.ant-empty', els => els && els.length && [...els].filter( e => e.innerText 
     && e.innerText.toLowerCase().includes('tidak ada kontak erat')).length)
@@ -113,9 +122,14 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
             // console.log('sudah klik')
 
           }
+          person.konfirm_silacak = true
         }
 
-        person.konfirm_silacak = true
+        person.konter_silacak = true
+        person = Object.assign({}, await that.upsertPerson({ person: Object.assign({}, person, {
+          konter_silacak: true
+        }) }), person)
+
 
       }
 
@@ -123,5 +137,15 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
 
 
   } 
+
+  // if(that.response.length) for(let konter of that.response) if(JSON.stringify(konter).includes(person.nik)){
+  //   // that.spinner.succeed(`${JSON.stringify(konter)}`)
+  //   let from = Object.fromEntries(konter.from.trackedEntityInstance.attributes.map( e => ([e.code, e.value])))
+  //   let to = Object.fromEntries(konter.to.trackedEntityInstance.attributes.map( e => ([e.code, e.value])))
+  //   that.spinner.succeed(`from ${JSON.stringify(from)}`)
+  //   that.spinner.succeed(`to ${JSON.stringify(to)}`)
+  // }
+
+  await that.upsertPerson({ person })
 
 }
