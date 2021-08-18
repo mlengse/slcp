@@ -34,6 +34,7 @@ exports._inputKonter = async ({ that, konterData }) => {
       notif = await that.page.evaluate( el => el.innerText, el)
     }
   }
+  await that.page.waitForTimeout(500)
 
   // for (let periksa of await that.page.$x(`//button[contains(.,'Periksa')]`)){
   //   if (await that.isVisible({ el: periksa})){
@@ -114,7 +115,7 @@ exports._inputKonter = async ({ that, konterData }) => {
   
     await that.clickBtn({ text: 'Simpan'})
   
-    await that.page.waitForTimeout('5000')
+    await that.page.waitForTimeout(2000)
   
     // await that.page.waitForResponse(response=> response.status() === 200)
   

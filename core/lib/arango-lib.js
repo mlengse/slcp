@@ -130,16 +130,16 @@ exports._arangoQuery = async ({ that, aq}) => {
 }
 
 exports._upsertPerson = async({ that, person}) => {
-	// if(that.config.ARANGODB_DB) {
-  //   let upsertData = await that.arangoUpsert({
-  //     coll: 'people',
-  //     doc: Object.assign({}, person, {
-  //       _key: `${person.nik}`
-  //     })
-  //   })
-  //   return upsertData.NEW
-  // } else {
-	// 	return that.upsertPersonJSON(person)
-	// }
-	return person
+	if(that.config.ARANGODB_DB) {
+    let upsertData = await that.arangoUpsert({
+      coll: 'people',
+      doc: Object.assign({}, person, {
+        _key: `${person.nik}`
+      })
+    })
+    return upsertData.NEW
+  } else {
+		return that.upsertPersonJSON(person)
+	}
+	// return person
 }

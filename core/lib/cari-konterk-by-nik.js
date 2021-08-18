@@ -1,6 +1,10 @@
 exports._cariKonterByNIK = async ({ that, nik }) => {
   that.spinner.start(`cariKonterByNIK ${nik}`)
 
+  if(that.response && JSON.stringify(that.response).includes(nik)){
+    return true
+  }
+
   // await that.page.waitForTimeout(1000)
 
   await that.reload()

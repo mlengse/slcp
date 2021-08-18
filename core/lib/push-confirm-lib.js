@@ -1,5 +1,7 @@
-exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
-  that.spinner.start(`catatKonfirmasiBaru ${confirmData.nik}`)
+exports._pushConfirm = async ({ that, confirmData }) => {
+  that.spinner.start(`pushConfirm ${confirmData.nama} ${confirmData.nik}`)
+  await that.loginSilacak()
+
   await that.clickBtn({ text: 'Catat Kasus' })
 
   await that.waitFor({ selector : '#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button'})
@@ -27,6 +29,8 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
       notif = await that.page.evaluate( el => el.innerText, el)
     }
   }
+  await that.page.waitForTimeout(500)
+
 
   notif && that.spinner.succeed(notif.split('\n').map(e => e.trim()).join(' '))
 
@@ -59,6 +63,7 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
       await that.page.waitForTimeout(100)
       ada = await that.page.$('#ContactFactorForm_eventDate')
     }
+    await that.page.waitForTimeout(500)
     await that.inputTgl({
       element: 'ContactFactorForm_eventDate',
       tgl: confirmData.konfirm_tgl_wawancara
@@ -66,7 +71,7 @@ exports._catatKonfirmasiBaru = async ({ that, confirmData}) => {
       
     await that.clickBtn({ text: 'Simpan'})
 
-    await that.page.waitForTimeout('5000')
+    await that.page.waitForTimeout(2000)
       
     // await that.page.waitForResponse(response=> response.status() === 200)
 

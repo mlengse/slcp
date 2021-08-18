@@ -20,7 +20,7 @@ exports._inputConvert =  async ({ that, person }) => {
 
   await that.clickBtn({ text: 'Simpan'})
   await that.findXPathAndClick({ xpath: '//button[contains(@class, "ant-btn-sm") and contains(.,"Ya")]'})
-  await that.page.waitForTimeout(5000)
+  await that.page.waitForTimeout(2000)
 
   await that.spinner.succeed(`ubah konter ${person.nama} tgl tes ${person.konfirm_tgl_onset}`)
 
@@ -47,9 +47,10 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
     if(exists){
       let [row] = await that.page.$x(`//tr[contains(.,'${indeksKasus.nik}')]`)
       while(!row){
-        await that.page.waitForTimeout(500);
+        await that.page.waitForTimeout(100);
         [row] = await that.page.$x(`//tr[contains(.,'${indeksKasus.nik}')]`)
       }
+      await that.page.waitForTimeout(500)
       let hrefEl = await row.$('td > a')
       let href = await that.page.evaluate( el => el.getAttribute('href').split('/')[el.getAttribute('href').split('/').length-1], hrefEl)
       
@@ -72,6 +73,7 @@ exports._convertKonterToKonfirm =  async ({ that, person, indeksKasus }) => {
       while(!that.response){
         await that.page.waitForTimeout(100)
       }
+      await that.page.waitForTimeout(500)
     
       // console.log(that.response)
       

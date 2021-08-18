@@ -14,9 +14,11 @@ module.exports = async (isPM2) => {
     await app.cleanData()
     // await app.upsertData()
 
-    let num = 0
-    for(let nik of app.indeksKasus)
+    // let num = 0
+    for(let [num, nik] of Object.entries(app.indeksKasus))
     // if(app.filter14(app.people[nik].konfirm_tgl_onset))
+    // if(app.people[nik].nama.toLowerCase().includes('rafi'))
+    // if(num > 304 )
     {
 
       let person = app.people[nik]
@@ -32,7 +34,7 @@ module.exports = async (isPM2) => {
 
       let namaIndeks
       if(person.isKonter){
-        num++
+        // num++
         let confirmData = app.people[Object.keys(app.people)
           .filter(iknik => person.konter_kelurahan === app.people[iknik].konfirm_kelurahan 
             && person.konter_indeks === app.people[iknik].konfirm_no)[0]]

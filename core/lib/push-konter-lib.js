@@ -1,47 +1,29 @@
-exports._pushConfirm = async ({ that, confirmData }) => {
-  that.spinner.start(`pushConfirm ${confirmData.nama} ${confirmData.nik}`)
-  if(!confirmData.konfirm_silacak) {
-    // push ke silacak
-    await that.loginSilacak()
 
-    // let exists = await that.cariConfirmByNIK({ confirmData})
-
-    // exists && await that.upsertPerson({person: Object.assign({}, confirmData, {
-    //   konfirm_silacak: true
-    // })})
-
-    // if(!exists){
-
-      // await that.cariKonterByNIK({ nik: confirmData.nik})
-      
-      await that.catatKonfirmasiBaru({confirmData})
-      // await that.reload()
-
-    // } 
-  }
-  // that.spinner.succeed(`sudah ada ${confirmData.nik} ${confirmData.nama}`)
-
-
-}
 
 exports._pushKonter = async ({ that, konterData, confirmData }) => {
-  // if(!konterData.konter_silacak) {
   that.spinner.start(`pushKonter ${konterData.nik} ${konterData.nama}`)
-  // await that.page.waitForTimeout(500);
 
-  // while(!isKonterInput){
   await that.loginSilacak()
 
-  // await that.page.reload()
+  if(that.response && JSON.stringify(that.response).includes(konterData.nik)){
+    konterData.konter_silacak = true
+    konterData = Object.assign({}, await that.upsertPerson({ person: Object.assign({}, konterData, {
+      konter_silacak: true
+    }) }), konterData)
+    that.spinner.succeed(`cari konter by NIK in confirm tab | nik: ${konterData.nik}, exists: true, konter_silacak: ${konterData.konter_silacak}`)
+    return 
+  }
+
 
   let indeksExists = await that.cariConfirmByNIK({confirmData})
 
   if(indeksExists) {
     let [row] = await that.page.$x(`//tr[contains(.,'${confirmData.nik}')]`)
     while(!row){
-      await that.page.waitForTimeout(500);
+      await that.page.waitForTimeout(100);
       [row] = await that.page.$x(`//tr[contains(.,'${confirmData.nik}')]`)
     }
+    await that.page.waitForTimeout(500)
     let hrefEl = await row.$('td > a')
     let href = await that.page.evaluate( el => el.getAttribute('href').split('/')[el.getAttribute('href').split('/').length-1], hrefEl)
 
@@ -64,6 +46,7 @@ exports._pushKonter = async ({ that, konterData, confirmData }) => {
       await that.page.waitForTimeout(100)
     }
   
+    await that.page.waitForTimeout(500)
     // console.log(that.response)
 
 

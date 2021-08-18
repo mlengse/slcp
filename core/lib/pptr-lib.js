@@ -23,12 +23,13 @@ exports._reload = async ({ that }) => {
       await that.page.reload()
     }
 
-    await that.page.waitForTimeout(500)
+    await that.page.waitForTimeout(100)
     inputNIK = await that.page.$('input#nik')
 
     // await that.page.waitForSelector('input#nik')
 
   }
+  await that.page.waitForTimeout(500)
 
   let [hapus] = await that.page.$x("//button[contains(., 'Hapus')]");
   if(hapus){
@@ -58,6 +59,7 @@ exports._findXPathAndClick = async ({ that, xpath }) => {
     await that.page.waitForTimeout(100)
   
   }
+  await that.page.waitForTimeout(500)
 
 }
 
@@ -107,6 +109,7 @@ exports._getPicker =  async ({ that }) => {
     }
   
   }
+  await that.page.waitForTimeout(500)
 
 
 }
@@ -116,6 +119,7 @@ exports._waitFor = async({ that, selector}) => {
     await that.page.waitForTimeout(100)
     el = await that.page.$(selector)
   }
+  await that.page.waitForTimeout(500)
 
   return el
 
@@ -149,11 +153,12 @@ exports._inputTgl = async ({ that, element, tgl }) => {
     }
     // console.log(!!left)
     await left.click()
-    await that.page.waitForTimeout(500)
+    await that.page.waitForTimeout(100)
     blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
     diff = that.getTglDiff(blnThnDef, blnThn)
     that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
   }
+  await that.page.waitForTimeout(500)
   // console.log(diff, blnThn, blnThnDef)
   // await that.page.waitForTimeout(500)
   let td, tgll
@@ -179,6 +184,7 @@ exports._inputTgl = async ({ that, element, tgl }) => {
     await that.page.waitForTimeout(100)
     num++
   }
+  await that.page.waitForTimeout(500)
 
   await td.click()
   await that.page.waitForTimeout(500)
@@ -198,6 +204,7 @@ exports._pilihOpsi = async ({ that, element, pilihan }) => {
     await that.page.waitForTimeout(100)
     num--
   }
+  await that.page.waitForTimeout(500)
 
   await that.page.keyboard.press('Enter')
 
@@ -236,7 +243,7 @@ exports._initBrowser = async ({ that }) => {
     that.page = that.pages[0]
 
     that.page.on('response', async response => {
-      if(response.request().resourceType() === 'xhr' && response.ok() && response.url().includes('relationships.json')){
+      if(response.request().resourceType() === 'xhr' && response.ok() && (response.url().includes('query.json') || response.url().includes('relationships.json'))){
         that.response = await response.json()
         // for(let konter of konters){
         //   console.log(JSON.stringify(konter))

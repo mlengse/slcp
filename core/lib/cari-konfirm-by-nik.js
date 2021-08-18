@@ -4,11 +4,17 @@ exports._cariConfirmByNIK = async ({ that, confirmData }) => {
 
   await that.reload()
 
+
   // that.spinner.start(`cariConfirmByNIK nik: ${nik}`)
   // await that.page.type('input#nik', '3372026504730002')
   await that.page.type('input#nik', confirmData.nik)
 
+  that.response = false
   await that.clickBtn({ text: 'Filter'})
+
+  while(!that.response){
+    await that.page.waitForTimeout(100)
+  }
 
   await that.page.waitForTimeout(500)
   //   that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
@@ -17,7 +23,7 @@ exports._cariConfirmByNIK = async ({ that, confirmData }) => {
   // console.log(JSON.stringify(that.response[that.response.length-1].json))
   let [table] = await that.page.$x("//table[contains(., 'Nama')]")
   while(!table){
-    await that.page.waitForTimeout(500)
+    await that.page.waitForTimeout(100)
     ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
   }
   await that.page.waitForTimeout(500)
@@ -57,19 +63,27 @@ exports._cariConfirmByNIK = async ({ that, confirmData }) => {
       await that.pushConfirm({ confirmData })
 
       await that.reload()
+
       
       await that.page.type('input#nik', confirmData.nik)
     
+      that.response = false
       await that.clickBtn({ text: 'Filter'})
     
+      while(!that.response){
+        await that.page.waitForTimeout(100)
+      }
       await that.page.waitForTimeout(500)
+    
+
+      // await that.page.waitForTimeout(500)
       //   that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
       // ])
     
       // console.log(JSON.stringify(that.response[that.response.length-1].json))
       ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
       while(!table){
-        await that.page.waitForTimeout(500)
+        await that.page.waitForTimeout(100)
         ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
       }
       await that.page.waitForTimeout(500)
