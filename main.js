@@ -23,7 +23,6 @@ module.exports = async (isPM2) => {
 
       let person = app.people[nik]
 
-
       // if(person.isKonfirm && !person.isKonter){
       //   num++
       //   if(!person.konfirm_silacak){

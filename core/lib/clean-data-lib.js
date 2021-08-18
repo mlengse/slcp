@@ -5,7 +5,6 @@ exports._cleanData = async ({ that }) => {
   for(let nik of Object.keys(that.people)){
     let person = Object.assign({}, await that.upsertPerson({person: that.people[nik]}), that.people[nik])
 
-
     if(person.isKonfirm){
       // that.spinner.start(`konfirm_tgl_onset: ${person.konfirm_tgl_onset}`)
       if(!person.umur){

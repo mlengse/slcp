@@ -53,6 +53,7 @@ exports._findXPathAndClick = async ({ that, xpath }) => {
       if(visible){
         // await el.focus()
         await el.evaluate( el => el.click())
+        break
       }
     }
 
