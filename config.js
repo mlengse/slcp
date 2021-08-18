@@ -6,9 +6,9 @@ let pptrOpt = {}
 // console.log(process.platform)
 if(process.platform === 'win32' || CHROME_PATH ) {
   pptrOpt = {
-    // headless: true,
-    devtools: true,
-    headless: false,
+    headless: true,
+    // devtools: true,
+    // headless: false,
     defaultViewport: null,
     executablePath: `${CHROME_PATH}`, 
     userDataDir: `${USER_DATA_PATH}`,
