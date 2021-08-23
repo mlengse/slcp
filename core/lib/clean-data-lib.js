@@ -45,6 +45,7 @@ exports._cleanData = async ({ that }) => {
 
       if(!that.filter14(person.konfirm_tgl_onset)){
         person.konfirm_tgl_wawancara = that.kurang13()
+        person.konfirm_tgl_onset = that.kurang13()
       }
 
     }
