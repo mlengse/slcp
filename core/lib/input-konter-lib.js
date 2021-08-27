@@ -76,10 +76,10 @@ exports._inputKonter = async ({ that, konterData }) => {
   
     await that.waitFor({selector: '#ContactFactorForm_eventDate'})
   
-    await that.inputTgl({
-      element: 'ContactFactorForm_eventDate',
-      tgl: konterData.konter_tgl_wawancara
-    })
+    // await that.inputTgl({
+    //   element: 'ContactFactorForm_eventDate',
+    //   tgl: konterData.konter_tgl_wawancara
+    // })
   
     // await that.page.click('#root > section > section > main > div')
   
@@ -116,6 +116,7 @@ exports._inputKonter = async ({ that, konterData }) => {
     await that.clickBtn({ text: 'Simpan'})
   
     await that.page.waitForTimeout(2000)
+    // person.konter_silacak
   
     // await that.page.waitForResponse(response=> response.status() === 200)
   

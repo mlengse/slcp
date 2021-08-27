@@ -132,7 +132,7 @@ exports._inputTgl = async ({ that, element, tgl }) => {
   let blnThn = that.changeToSlcBlnThn(tgl)
   that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn ${blnThn}`)
   let input = await that.waitFor({ selector: `input#${element}`})
-  await input.click()
+  await that.page.click(`input#${element}`)
   // await that.page.waitForTimeout(500)
   // await that.page.$eval(`input#${element}`, el => el.click());
   // await that.page.waitForTimeout(500)

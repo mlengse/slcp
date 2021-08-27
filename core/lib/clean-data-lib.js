@@ -182,6 +182,8 @@ exports._cleanData = async ({ that }) => {
   that.indeksKasus = that.indeksKasus.filter( nik => !(that.people[nik].isKonfirm
     && !that.people[nik].isKonter
     && !that.people[nik].hasKonter
-    ))
+    )
+    && that.people[nik].konter_tgl_exit ? that.isNowOrBefore(that.people[nik].konter_tgl_exit) : true
+    )
 
 }
