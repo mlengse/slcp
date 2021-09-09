@@ -179,7 +179,15 @@ exports._cleanData = async ({ that }) => {
     hasKonter && that.indeksKasus.splice(that.indeksKasus.indexOf(iknik)+1, 0, ...konters)
   }
 
-  that.indeksKasus = that.indeksKasus.filter( nik => !(that.people[nik].isKonfirm
+  that.indeksKasus = that.indeksKasus.filter( nik => {
+    let a = Object.keys(that.people[nik])
+    .filter( k => k.includes('tgl') || k.includes('tanggal'))
+    .filter( k => !that.filter14(that.people[nik][k]))
+    // if(that.people[nik].nama.includes('Ong')){
+      // a.map( e => console.log(e, that.people[nik][e], that.filter14(that.people[nik][e])))
+    // console.log(a)
+    return a.length === 0
+  }).filter( nik => !(that.people[nik].isKonfirm
     && !that.people[nik].isKonter
     && !that.people[nik].hasKonter
     )
