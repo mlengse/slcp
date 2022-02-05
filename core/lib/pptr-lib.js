@@ -217,7 +217,7 @@ exports._clickSelanjutnya = async({ that }) => await that.clickBtn({ text: 'Sela
 exports._clickBtn = async({ that, text}) => await that.findXPathAndClick({xpath: `//button[contains(., '${text}')]`});
 
 exports._gotoKonterTab = async({ that }) => {
-  await that.findXPathAndClick({ xpath: "//div[contains(@class, 'ant-tabs-tab') and contains(.,'Kontak')]"})
+  await that.findXPathAndClick({ xpath: "//div[contains(@class, 'ant-tabs-tab-btn') and contains(.,'Kontak')]"})
 }
 
 exports._loginSilacak = async ({ that }) => {

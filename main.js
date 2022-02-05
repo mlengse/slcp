@@ -22,7 +22,6 @@ module.exports = async (isPM2) => {
     {
 
       let person = app.people[nik]
-      console.log(person)
 
       // if(person.isKonfirm && !person.isKonter){
       //   num++
@@ -67,6 +66,7 @@ module.exports = async (isPM2) => {
     
       // app.spinner.succeed(`---------------------------------------------------`)
       await app.upsertPerson({person})
+      console.log(person)
     }
 
     await app.close(isPM2)
