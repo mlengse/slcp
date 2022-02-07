@@ -127,6 +127,9 @@ exports._cleanData = async ({ that }) => {
 
     person.nama = person.nama.split('.').join(' ').split(',').join(' ')
     if(person.isKonter && person.isKonfirm) {
+      if(!person.konter_tgl_kontak && person.konfirm_tgl_onset){
+        person.konter_tgl_kontak = that.kurang2(person.konfirm_tgl_onset)
+      }
       person.selisihEntryOnset = that.getSelisihHari(person.konter_tgl_entry, person.konfirm_tgl_onset)
       if(person.selisihEntryOnset < 1 ){
         person.selisihEntryOnset = 1

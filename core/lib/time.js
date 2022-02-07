@@ -14,6 +14,7 @@ exports.list13 = () => [...Array(12).keys()].map( n => moment().subtract(n, 'day
 exports.tambah6 = tgl => moment(tgl, 'DD/MM/YYYY').add(6, 'days').format('DD/MM/YYYY')
 exports.tambah1 = tgl => moment(tgl, 'DD/MM/YYYY').add(1, 'days').format('DD/MM/YYYY')
 exports.kurang1 = tgl => moment(tgl, 'DD/MM/YYYY').add(-1, 'days').format('DD/MM/YYYY')
+exports.kurang2 = tgl => moment(tgl, 'DD/MM/YYYY').add(-2, 'days').format('DD/MM/YYYY')
 exports.kurang13 = () => moment().add(-13, 'days').format('DD/MM/YYYY')
 exports.filter14 = tgl => moment().diff(moment(tgl, 'DD/MM/YYYY'), 'days', false) < 14
 exports.isNowOrBefore = tgl => moment().diff(moment(tgl, 'DD/MM/YYYY'), 'days', false) >= 0

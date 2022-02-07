@@ -115,6 +115,8 @@ exports._getPicker =  async ({ that }) => {
 
 }
 exports._waitFor = async({ that, selector}) => {
+  that.spinner.start(`waitFor: ${selector}`)
+
   let el = await that.page.$(selector)
   while(!el){
     await that.page.waitForTimeout(100)
@@ -130,7 +132,7 @@ exports._waitFor = async({ that, selector}) => {
 exports._inputTgl = async ({ that, element, tgl }) => {
   that.spinner.start(`element: ${element}, tgl: ${tgl}`)
   let blnThn = that.changeToSlcBlnThn(tgl)
-  that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn ${blnThn}`)
+  that.spinner.start(`element: ${element}, blnThn ${blnThn}`)
   let input = await that.waitFor({ selector: `input#${element}`})
   await that.page.click(`input#${element}`)
   // await that.page.waitForTimeout(500)
@@ -140,7 +142,7 @@ exports._inputTgl = async ({ that, element, tgl }) => {
   let pickerElement = await that.getPicker()
   let blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
   let diff = that.getTglDiff(blnThnDef, blnThn)
-  that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
+  that.spinner.start(`element: ${element}, slash: ${slash}`)
   let left = await pickerElement.$('button.ant-picker-header-prev-btn > span')
   while (diff !== 0 && blnThn !== blnThnDef){
     pickerElement = await that.getPicker()
@@ -157,7 +159,7 @@ exports._inputTgl = async ({ that, element, tgl }) => {
     await that.page.waitForTimeout(100)
     blnThnDef = await pickerElement.$eval('div.ant-picker-header-view', el => el.innerText)
     diff = that.getTglDiff(blnThnDef, blnThn)
-    that.spinner.start(`element: ${element}, tgl: ${tgl}, blnThn: ${blnThn}, blnThnDef: ${blnThnDef}, diff: ${diff}, slash: ${slash}`)
+    that.spinner.start(`element: ${element}, slash: ${slash}`)
   }
   await that.page.waitForTimeout(500)
   // console.log(diff, blnThn, blnThnDef)
@@ -244,8 +246,12 @@ exports._initBrowser = async ({ that }) => {
     that.page = that.pages[0]
 
     that.page.on('response', async response => {
-      if(response.request().resourceType() === 'xhr' && response.ok() && (response.url().includes('query.json') || response.url().includes('relationships.json'))){
-        that.response = await response.json()
+      if(response && response.request().resourceType() === 'xhr' && response.ok() && (response.url().includes('query.json') || response.url().includes('relationships.json'))){
+        try {
+          that.response = await response.json()
+        } catch (e){
+          console.error(`process error: ${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
+        }
         // for(let konter of konters){
         //   console.log(JSON.stringify(konter))
         // }
