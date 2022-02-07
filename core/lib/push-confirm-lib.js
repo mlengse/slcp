@@ -2,6 +2,8 @@ exports._pushConfirm = async ({ that, confirmData }) => {
   that.spinner.start(`pushConfirm ${confirmData.nama} ${confirmData.nik}`)
   await that.loginSilacak()
 
+  // await that.clickBtn({ text: 'Beranda' })
+  // await that.findXPathAndClick({ xpath: `//span[contains(.,'Beranda')]`})
   await that.clickBtn({ text: 'Catat Kasus' })
 
   await that.waitFor({ selector : '#root > section > section > main > div > div > div.ant-space.ant-space-horizontal.ant-space-align-baseline > div:nth-child(1) > button'})
@@ -91,9 +93,12 @@ exports._pushConfirm = async ({ that, confirmData }) => {
 
   await that.upsertPerson({ person: confirmData})
 
+  await that.page.waitForTimeout(5000)
 
-  // await that.page.waitForTimeout(5000)
   that.spinner.succeed(`catatKonfirmasiBaru ${confirmData.nik}`)
+  // await that.findXPathAndClick({ xpath: `//span[contains(.,'Beranda')]`})
+  exists = await that.cariConfirmByNIK({confirmData})
+
 
 
 }

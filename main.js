@@ -23,13 +23,13 @@ module.exports = async (isPM2) => {
 
       let person = app.people[nik]
 
-      // if(person.isKonfirm && !person.isKonter){
-      //   num++
-      //   if(!person.konfirm_silacak){
-      //     // 1. push konfirm yg !konter
-      //     await app.pushConfirm({ confirmData: person })
-      //   }
-      // }
+      if(person.isKonfirm && !person.isKonter){
+        num++
+        if(!person.konfirm_silacak){
+          // 1. push konfirm yg !konter
+          await app.pushConfirm({ confirmData: person })
+        }
+      }
 
       let namaIndeks
       if(person.isKonter){
@@ -68,7 +68,7 @@ module.exports = async (isPM2) => {
     
       // app.spinner.succeed(`---------------------------------------------------`)
       await app.upsertPerson({person})
-      console.log(person)
+      // console.log(person)
     }
 
     await app.close(isPM2)

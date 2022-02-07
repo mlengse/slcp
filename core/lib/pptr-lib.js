@@ -42,7 +42,7 @@ exports._reload = async ({ that }) => {
 exports._getInnerText = async({ that, el}) => await that.page.evaluate( el => el.innerText, el)
 
 exports._findXPathAndClick = async ({ that, xpath }) => {
-  // that.spinner.start(`findXPathAndClick ${xpath}`)
+  that.spinner.start(`findXPathAndClick ${xpath}`)
   let visible = false
   while(!visible){
     for(let el of await that.page.$x(xpath)){
@@ -236,6 +236,7 @@ exports._loginSilacak = async ({ that }) => {
     that.spinner.succeed('logged in')
   
   }
+
 
 }
 
