@@ -35,16 +35,19 @@ exports._cariConfirmByNIK = async ({ that, confirmData }) => {
       let person = that.people[Object.keys(that.people)
         .filter(iknik => confirmData.konter_kelurahan === that.people[iknik].konfirm_kelurahan 
           && confirmData.konter_indeks === that.people[iknik].konfirm_no)[0]]
-      let namaIndeks = person.nama
-      that.spinner.succeed(`${confirmData.nama} ${confirmData.nik}${confirmData.isKonter ? ` konter ${namaIndeks} tgl_kontak ${confirmData.konter_tgl_kontak}` : ''}${confirmData.isKonfirm && confirmData.isKonter? ' =>' : ''}${confirmData.isKonfirm ? ` konfirm tgl_onset ${confirmData.konfirm_tgl_onset}` : ''}`)
-      // 2. push konter dari konfirm (1)
-      // console.log(confirmData)
-      if(!confirmData.konter_silacak){
-        await that.pushKonter({ 
-          konterData: confirmData, 
-          confirmData: person
-        })
-      }
+      // if(person && person.nama){
+        let namaIndeks = person.nama
+        that.spinner.succeed(`${confirmData.nama} ${confirmData.nik}${confirmData.isKonter ? ` konter ${namaIndeks} tgl_kontak ${confirmData.konter_tgl_kontak}` : ''}${confirmData.isKonfirm && confirmData.isKonter? ' =>' : ''}${confirmData.isKonfirm ? ` konfirm tgl_onset ${confirmData.konfirm_tgl_onset}` : ''}`)
+        // 2. push konter dari konfirm (1)
+        // console.log(confirmData)
+        if(!confirmData.konter_silacak){
+          await that.pushKonter({ 
+            konterData: confirmData, 
+            confirmData: person
+          })
+        }
+  
+      // }
 
       if(confirmData.isKonfirm){
         // 3. push konter (2) yg jadi konfirm
