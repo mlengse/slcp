@@ -2,8 +2,12 @@ exports._cariConfirmByNIK = async ({ that, confirmData }) => {
   // that.spinner.start(`cariConfirmByNIK ${confirmData.nik}`)
   let exists
 
+  that.response = false
   await that.reload()
 
+  while(!that.response){
+    await that.page.waitForTimeout(100)
+  }
 
   // that.spinner.start(`cariConfirmByNIK nik: ${nik}`)
   // await that.page.type('input#nik', '3372026504730002')
@@ -16,18 +20,21 @@ exports._cariConfirmByNIK = async ({ that, confirmData }) => {
     await that.page.waitForTimeout(100)
   }
 
-  await that.page.waitForTimeout(500)
-  //   that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
-  // ])
+  exists = JSON.stringify(that.response).includes(confirmData.nik)
 
-  // console.log(JSON.stringify(that.response[that.response.length-1].json))
-  let [table] = await that.page.$x("//table[contains(., 'Nama')]")
-  while(!table){
-    await that.page.waitForTimeout(100)
-    ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
-  }
-  await that.page.waitForTimeout(500)
-  exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, confirmData.nik)
+
+  // await that.page.waitForTimeout(500)
+  // //   that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
+  // // ])
+
+  // // console.log(JSON.stringify(that.response[that.response.length-1].json))
+  // let [table] = await that.page.$x("//table[contains(., 'Nama')]")
+  // while(!table){
+  //   await that.page.waitForTimeout(100)
+  //   ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
+  // }
+  // await that.page.waitForTimeout(500)
+  // exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, confirmData.nik)
 
   if(!exists){
     // console.log(confirmData)
@@ -65,10 +72,16 @@ exports._cariConfirmByNIK = async ({ that, confirmData }) => {
       that.spinner.start(`pushConfirm ${confirmData.nama}`)
       await that.pushConfirm({ confirmData })
 
+      that.response = false
       await that.reload()
 
-      
+      while(!that.response){
+        await that.page.waitForTimeout(100)
+      }
+
       await that.page.type('input#nik', confirmData.nik)
+
+      // await that.page.waitForTimeout(5000)
     
       that.response = false
       await that.clickBtn({ text: 'Filter'})
@@ -76,21 +89,24 @@ exports._cariConfirmByNIK = async ({ that, confirmData }) => {
       while(!that.response){
         await that.page.waitForTimeout(100)
       }
-      await that.page.waitForTimeout(500)
+      // await that.page.waitForTimeout(500)
     
 
-      // await that.page.waitForTimeout(500)
-      //   that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
-      // ])
+      // // await that.page.waitForTimeout(500)
+      // //   that.page.waitForResponse(response=>response.url().includes(`${nik}`) && response.status() === 200)
+      // // ])
     
-      // console.log(JSON.stringify(that.response[that.response.length-1].json))
-      ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
-      while(!table){
-        await that.page.waitForTimeout(100)
-        ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
-      }
-      await that.page.waitForTimeout(500)
-      exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, confirmData.nik)
+      // // console.log(JSON.stringify(that.response[that.response.length-1].json))
+      // ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
+      // while(!table){
+      //   await that.page.waitForTimeout(500)
+      //   ;[table] = await that.page.$x("//table[contains(., 'Nama')]")
+      // }
+      // await that.page.waitForTimeout(500)
+      // exists = await that.page.evaluate( (el, nik) => el.innerText.includes(nik), table, confirmData.nik)
+
+      exists = JSON.stringify(that.response).includes(confirmData.nik)
+
 
     }
   
