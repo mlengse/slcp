@@ -137,7 +137,7 @@ exports._fetchSheet = async ( {that, sheetName}) => {
         // console.log(`${row[0]}, ${row[4]}`);
       })
       
-      let filteredRows = rows.filter(row => !Array.isArray(row) && row.nik && row.nik.length === 16);
+      let filteredRows = rows.filter(row => !Array.isArray(row) && row.nik && row.nik.length === 16 && row.nik.match(/^[0-9]+$/));
       // rows.shift()
       that.spinner.succeed(`data found ${sheetName}: ${filteredRows.length}`)
       resolve(filteredRows)

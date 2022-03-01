@@ -3,6 +3,7 @@ exports._cleanData = async ({ that }) => {
   await that.fixTgl()
 
   for(let nik of Object.keys(that.people)){
+    // console.log(nik)
     let person = Object.assign({}, await that.upsertPerson({person: that.people[nik]}), that.people[nik])
 
     if(person.isKonfirm){

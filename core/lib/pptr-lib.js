@@ -8,6 +8,7 @@ exports.waitOpt = waitOpt
 exports._waitNav = async ({ that }) => await that.page.waitForNavigation(waitOpt)
 
 exports._reload = async ({ that }) => {
+      await that.page.reload()
 
   // that.spinner.start('reload')
   await that.page.waitForTimeout(500)
@@ -20,7 +21,8 @@ exports._reload = async ({ that }) => {
     if(beranda){
       await that.findXPathAndClick({ xpath: `//a[contains(.,'Beranda')]`})
     } else {
-      await that.page.reload()
+    await that.page.waitForTimeout(100)
+    // await that.page.reload()
     }
 
     await that.page.waitForTimeout(100)
