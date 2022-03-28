@@ -36,7 +36,7 @@ exports._pushConfirm = async ({ that, confirmData }) => {
 
   notif && that.spinner.succeed(notif.split('\n').map(e => e.trim()).join(' '))
 
-  if(notif && notif.toLowerCase().includes('belum terdaftar')){
+  if(notif && (notif.toLowerCase().includes('kontak erat') || notif.toLowerCase().includes('belum terdaftar'))){
     await Promise.all([
       that.page.waitForTimeout(2000),
       // that.page.waitForResponse(response=> response.status() === 200)
